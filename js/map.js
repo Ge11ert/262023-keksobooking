@@ -41,6 +41,7 @@
     Y_MAX: 500
   };
 
+  /** @enum {number} PinImageSize */
   var PinImageSize = {
     WIDTH: 40,
     HEIGHT: 40,
@@ -119,6 +120,7 @@
   }
 
   /**
+   * Generates relative path to a user image
    * @return {string} - Path to user image
    */
   function getUserAvatar() {
@@ -133,6 +135,7 @@
   }
 
   /**
+   * Takes a title for an advert and removes the title from the array
    * @return {string} - A title for a new advert
    */
   function getOfferTitle() {
@@ -166,6 +169,7 @@
   }
 
   /**
+   * Selects one of the time options from array for 'check in' time or 'check out' time
    * @param {Array.<string>} checkTimeArray
    * @return {string}
    */
@@ -299,6 +303,7 @@
     var userAvatar = card.querySelector('.popup__avatar');
 
     /**
+     * Returns a string with house type to be rendered
      * @param {string} type
      * @return {string}
      */
@@ -321,6 +326,7 @@
     }
 
     /**
+     * Creates an unsorted list of features (UL) with LI children
      * @param {Node} featureList
      * @return {Node}
      */
