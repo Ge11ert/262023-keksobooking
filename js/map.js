@@ -8,26 +8,18 @@
    * @property {Object} location
    */
 
-  /** @const {number} */
-  var ADVERTS_AMOUNT = 8;
-
-  /** @const {Array.<string>} */
-  var TITLES = [
-    'Большая уютная квартира', 'Маленькая неуютная квартира', 'Огромный прекрасный дворец',
-    'Маленький ужасный дворец', 'Красивый гостевой домик', 'Некрасивый негостеприимный домик',
-    'Уютное бунгало далеко от моря', 'Неуютное бунгало по колено в воде'];
-
-  /** @const {Array.<string>} */
-  var TYPES = ['flat', 'house', 'bungalo'];
-
-  /** @const {Array.<string>} */
-  var CHECKIN_TIMES = ['12:00', '13:00', '14:00'];
-
-  /** @const {Array.<string>} */
-  var CHECKOUT_TIMES = ['12:00', '13:00', '14:00'];
-
-  /** @const {Array.<string>} */
-  var FEATURES_LIST = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
+  /**
+   * @enum {Array.<string>} AdvertParams
+   */
+  var AdvertParams = {
+    TITLES: [
+      'Большая уютная квартира', 'Маленькая неуютная квартира', 'Огромный прекрасный дворец',
+      'Маленький ужасный дворец', 'Красивый гостевой домик', 'Некрасивый негостеприимный домик',
+      'Уютное бунгало далеко от моря', 'Неуютное бунгало по колено в воде'],
+    TYPES: ['flat', 'house', 'bungalo'],
+    CHECKINOUT_TIMES: ['12:00', '13:00', '14:00'],
+    FEATURES_LIST: ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner']
+  };
 
   /** @enum {number} Prices */
   var Prices = {
@@ -49,11 +41,21 @@
     Y_MAX: 500
   };
 
+  var PinImageSize = {
+    WIDTH: 40,
+    HEIGHT: 40,
+    OFFSET_X: -3,
+    OFFSET_Y: -38
+  };
+
+  /** @const {number} */
+  var ADVERTS_AMOUNT = 8;
+
   /** @const {number} */
   var MAX_GUESTS = 7;
 
   var userIndex = 0;
-  var lastUsedTitle = 0;
+  var titlesCopy = AdvertParams.TITLES.slice();
   var adverts = createAdvertsArray();
 
   var map = document.querySelector('.map');
@@ -64,8 +66,8 @@
   var mapCardTemplate = document.querySelector('template').content.querySelector('article.map__card');
   var filtersContainer = document.querySelector('map__filters-container');
 
-  /** -------------------------------------------------------------------
-   *  ------------------- Functions of MODEL component ------------------- */
+  // -------------------------------------------------------------------
+  // ------------------- Functions of MODEL component ------------------
 
   /**
    * Fills up an array with generated adverts
@@ -76,6 +78,7 @@
     for (var i = 0; i < ADVERTS_AMOUNT; i++) {
       advertsArray.push(generateAdvert());
     }
+
     return advertsArray;
   }
 
@@ -84,42 +87,45 @@
    * @return {Advert}
   */
   function generateAdvert() {
-    var advert = {
+    var locX = Math.floor(getRandomFromRange(LocationBorders.X_MIN, LocationBorders.X_MAX));
+    var locY = Math.floor(getRandomFromRange(LocationBorders.Y_MIN, LocationBorders.Y_MAX));
+    var title = getOfferTitle();
+    var houseType = getHouseType(title);
+
+    return {
       author: {
         avatar: getUserAvatar()
       },
 
       offer: {
-        title: getOfferTitle(),
-        address: '',
+        title: title,
+        address: locX + ' ' + locY,
         price: Math.floor(getRandomFromRange(Prices.MIN, Prices.MAX)),
-        type: '',
+        type: houseType,
         rooms: getRoomsQuantity(),
         guests: Math.floor(getRandomFromRange(1, MAX_GUESTS)),
-        checkin: getCheckInOutTime(CHECKIN_TIMES),
-        checkout: getCheckInOutTime(CHECKOUT_TIMES),
+        checkin: getCheckInOutTime(AdvertParams.CHECKINOUT_TIMES),
+        checkout: getCheckInOutTime(AdvertParams.CHECKINOUT_TIMES),
         features: getFeaturesList(),
         description: '',
         photos: []
       },
 
       location: {
-        x: Math.floor(getRandomFromRange(LocationBorders.X_MIN, LocationBorders.X_MAX)),
-        y: Math.floor(getRandomFromRange(LocationBorders.Y_MIN, LocationBorders.Y_MAX))
+        x: locX,
+        y: locY
       }
     };
-    advert.offer.type = getHouseType(advert.offer.title);
-    advert.offer.address = advert.location.x + ' ' + advert.location.y;
-    return advert;
   }
 
   /**
    * @return {string} - Path to user image
    */
   function getUserAvatar() {
-    var pathBase = 'img/avatars/user0';
-    if (userIndex < ADVERTS_AMOUNT) {
-      userIndex++;
+    var pathBase = 'img/avatars/user';
+    userIndex++;
+    if (userIndex <= ADVERTS_AMOUNT) {
+      pathBase = (userIndex < 10) ? pathBase + '0' : pathBase;
       return pathBase + userIndex + '.png';
     } else {
       return 'img/avatars/default.png';
@@ -130,33 +136,29 @@
    * @return {string} - A title for a new advert
    */
   function getOfferTitle() {
-    var title = TITLES[lastUsedTitle];
-    lastUsedTitle++;
-    return title;
+    return titlesCopy.splice(0, 1)[0];
   }
 
   /**
-   *
+   * Returns a title of an advert according to its house type
    * @param {string} advertTitle
    * @return {string}
    */
   function getHouseType(advertTitle) {
     var typeIndex = 0;
-    switch (true) {
-      case (advertTitle.search(/[Кк]вартира/) > -1):
-        typeIndex = 0;
-        break;
-      case (advertTitle.search(/[Дд]ворец|[Дд]ом/) > -1):
-        typeIndex = 1;
-        break;
-      case (advertTitle.search(/[Бб]унгало/) > -1):
-        typeIndex = 2;
-        break;
+    if (/квартира/.test(advertTitle.toLowerCase())) {
+      typeIndex = 0;
+    } else if (/дворец/.test(advertTitle.toLowerCase())) {
+      typeIndex = 1;
+    } else {
+      typeIndex = 2;
     }
-    return TYPES[typeIndex];
+
+    return AdvertParams.TYPES[typeIndex];
   }
 
   /**
+   * Returns a random number of rooms for each advert
    * @return {number}
    */
   function getRoomsQuantity() {
@@ -164,8 +166,8 @@
   }
 
   /**
-   * @param {Array.<String>} checkTimeArray
-   * @return {String}
+   * @param {Array.<string>} checkTimeArray
+   * @return {string}
    */
   function getCheckInOutTime(checkTimeArray) {
     var timeIndex = getRandomFromRange(0, checkTimeArray.length - 1).toFixed();
@@ -173,25 +175,42 @@
   }
 
   /**
-   * Generates a random set of advert features. In each iteration of 'for loop',
-   * arrayOfIndexes indicates the features, which weren't already used.
+   * Generates a random set of advert features.
    * @return {Array} - Array of random chosen features
    */
   function getFeaturesList() {
-    var featuresArrayLength = getRandomFromRange(1, FEATURES_LIST.length).toFixed();
-    var featuresArray = [];
-    var arrayOfIndexes = [];
+    var featuresArrayLength = Math.floor(getRandomFromRange(1, AdvertParams.FEATURES_LIST.length));
+    return getRandomArrayCopy(featuresArrayLength, AdvertParams.FEATURES_LIST, true);
+  }
 
-    for (var k = 0; k < FEATURES_LIST.length; k++) {
-      arrayOfIndexes.push(k);
+  /**
+   * Creates an array of defined size. This array is filled with elements from the base array.
+   * Elements of the new array can be repeating or not. Elements order is random.
+   * @param {number} arrLen - Length of an array to be returned
+   * @param {Array} baseArray - Initial array, from which elements will be copied
+   * @param {boolean} unique - Defines, if array elements should be non-repeatable
+   * @return {Array}
+   */
+  function getRandomArrayCopy(arrLen, baseArray, unique) {
+    var baseArrCopy = baseArray.slice();
+    var newArray = [];
+    var newItem = '';
+
+    if (arrLen > baseArray.length) {
+      arrLen = baseArray.length;
     }
 
-    for (var i = 0; i < featuresArrayLength; i++) {
-      var randomIndex = arrayOfIndexes[getRandomFromRange(0, arrayOfIndexes.length - 1).toFixed()];
-      featuresArray.push(FEATURES_LIST[randomIndex]);
-      arrayOfIndexes.splice(arrayOfIndexes.indexOf(randomIndex), 1);
+    while (newArray.length < arrLen) {
+      var randomIndex = Math.floor(getRandomFromRange(0, baseArrCopy.length - 1));
+      if (unique) {
+        newItem = baseArrCopy.splice(randomIndex, 1)[0];
+      } else {
+        newItem = baseArrCopy[randomIndex];
+      }
+      newArray.push(newItem);
     }
-    return featuresArray;
+
+    return newArray;
   }
 
   /**
@@ -205,8 +224,8 @@
   }
 
 
-  /** -------------------------------------------------------------------
-   *  ------------------- Functions of VIEW component ------------------- */
+  // -------------------------------------------------------------------
+  // ------------------- Functions of VIEW component -------------------
 
   /**
    * Creates a DOM Element 'Map Pin' using data from a single advert
@@ -214,26 +233,20 @@
    * @return {Element}
    */
   function renderMapPin(advert) {
-    var pinWidth = 40;
-    var pinHeight = 40;
-    var offset = {
-      x: pinWidth / 2,
-      y: pinHeight
-    };
-
     var pin = document.createElement('button');
     var avatar = document.createElement('img');
 
-    pin.classList.add('map__pin');
-    pin.style.left = advert.location.x - offset.x + 'px';
-    pin.style.top = advert.location.y - offset.y + 'px';
-
     avatar.src = advert.author.avatar;
-    avatar.width = pinWidth;
-    avatar.height = pinHeight;
+    avatar.width = PinImageSize.WIDTH;
+    avatar.height = PinImageSize.HEIGHT;
     avatar.draggable = false;
 
     pin.appendChild(avatar);
+
+    pin.classList.add('map__pin');
+    pin.style.left = advert.location.x - PinImageSize.OFFSET_X + 'px';
+    pin.style.top = advert.location.y - PinImageSize.OFFSET_Y + 'px';
+
     return pin;
   }
 
@@ -244,9 +257,11 @@
    */
   function createPinsFromData(advertsArray) {
     var pinsArray = [];
+
     advertsArray.forEach(function (item) {
       pinsArray.push(renderMapPin(item));
     });
+
     return pinsArray;
   }
 
@@ -261,6 +276,7 @@
     pinsArray.forEach(function (pin) {
       fragment.appendChild(pin);
     });
+
     return fragment;
   }
 
@@ -287,39 +303,20 @@
      * @return {string}
      */
     function getType(type) {
-      switch (type) {
-        case 'flat':
-          return 'Квартира';
-        case 'house':
-          return 'Дом';
-        case 'bungalo':
-          return 'Бунгало';
-      }
-      return '';
+      var flatTypes = {
+        'flat': 'Квартира',
+        'house': 'Дом',
+        'bungalo': 'Бунгало'
+      };
+
+      return (flatTypes[type] || '');
     }
 
     /** @return {string} */
     function getRoomsAndGuests() {
-      var guestsEnding = '';
-      var roomsEnding = '';
+      var guestsEnding = getEnding(advert.offer.guests, ['гостя', 'гостей', 'гостей']);
+      var roomsEnding = getEnding(advert.offer.rooms, ['комната', 'комнаты', 'комнат']);
 
-      if (advert.offer.guests === 1) {
-        guestsEnding = 'гостя';
-      } else {
-        guestsEnding = 'гостей';
-      }
-
-      switch (advert.offer.rooms) {
-        case 1:
-          roomsEnding = 'комната';
-          break;
-        case 5:
-          roomsEnding = 'комнат';
-          break;
-        default:
-          roomsEnding = 'комнаты';
-          break;
-      }
       return advert.offer.rooms + ' ' + roomsEnding + ' для ' + advert.offer.guests + ' ' + guestsEnding;
     }
 
@@ -327,10 +324,8 @@
      * @param {Node} featureList
      * @return {Node}
      */
-    function checkFeatures(featureList) {
-      while (featureList.hasChildNodes()) {
-        featureList.removeChild(featureList.lastChild); // clear UL element
-      }
+    function fillFeaturesList(featureList) {
+      clearList(featureList);
       advert.offer.features.forEach(function (feature) {
         var li = document.createElement('li');
         li.className = 'feature feature--' + feature;
@@ -339,20 +334,53 @@
       return featureList;
     }
 
+    /**
+     * Accepts a DOM node and removes its child nodes
+     * @param {Node} node
+     */
+    function clearList(node) {
+      while (node.hasChildNodes()) {
+        node.removeChild(node.lastChild); // clear UL element
+      }
+    }
+
     cardTitle.textContent = advert.offer.title;
     cardAddress.textContent = advert.offer.address;
     cardPrice.textContent = advert.offer.price + '\t\u20BD/ночь';
     cardType.textContent = getType(advert.offer.type);
     cardRooms.textContent = getRoomsAndGuests();
     cardTime.textContent = 'Заезд после ' + advert.offer.checkin + ', ' + 'выезд до ' + advert.offer.checkout;
-    checkFeatures(cardFeatures);
+    fillFeaturesList(cardFeatures);
     cardDescription.textContent = advert.offer.description;
     userAvatar.src = advert.author.avatar;
     return card;
   }
 
-  map.classList.remove('map--faded');
+  /**
+   * Returns corresponding form of a word, depending on number before the word
+   * @param {number} num - Integer
+   * @param {Array.<string>} endingForms - [For one, for 2 - 4, more than 4]
+   * @return {string}
+   */
+  function getEnding(num, endingForms) {
+    var num10 = num % 10;
+    var num100 = num % 100;
+
+    if (num10 === 1) {
+      return endingForms[0];
+    }
+    if (num10 > 1 && num10 < 5) {
+      return endingForms[1];
+    }
+    if (num100 > 5 && num100 < 20) {
+      return endingForms[2];
+    }
+
+    return endingForms[2];
+  }
+
   mapPins.appendChild(mapPinsFragment);
   var advCard = fillAdvertCard(adverts[0]);
   map.insertBefore(advCard, filtersContainer);
+  map.classList.remove('map--faded');
 })();
