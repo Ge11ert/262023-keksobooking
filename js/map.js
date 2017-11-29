@@ -301,61 +301,58 @@
     var cardDescription = card.querySelector('p:nth-of-type(5)');
     var userAvatar = card.querySelector('.popup__avatar');
 
-    /**
-     * Returns a string with house type to be rendered
-     * @param {string} type
-     * @return {string}
-     */
-    var getType = function (type) {
-
-      return (AdvertParams.ACCOMMODATION_TYPES[type] || '');
-    };
-
-    /** @return {string} */
-    var getRoomsAndGuests = function () {
-      var guestsEnding = getEnding(advert.offer.guests, ['гостя', 'гостей', 'гостей']);
-      var roomsEnding = getEnding(advert.offer.rooms, ['комната', 'комнаты', 'комнат']);
-
-      return advert.offer.rooms + ' ' + roomsEnding + ' для ' + advert.offer.guests + ' ' + guestsEnding;
-    };
-
-    /**
-     * Creates an unsorted list of features (UL) with LI children
-     * @param {Node} featureList
-     * @return {Node}
-     */
-    var fillFeaturesList = function (featureList) {
-      clearList(featureList);
-      advert.offer.features.forEach(function (feature) {
-        var li = document.createElement('li');
-        li.className = 'feature feature--' + feature;
-        featureList.appendChild(li);
-      });
-
-      return featureList;
-    };
-
-    /**
-     * Accepts a DOM node and removes its child nodes
-     * @param {Node} node
-     */
-    var clearList = function (node) {
-      while (node.hasChildNodes()) {
-        node.removeChild(node.lastChild); // clear UL element
-      }
-    };
-
     cardTitle.textContent = advert.offer.title;
     cardAddress.textContent = advert.offer.address;
     cardPrice.textContent = advert.offer.price + '\t\u20BD/ночь';
-    cardType.textContent = getType(advert.offer.type);
-    cardRooms.textContent = getRoomsAndGuests();
+    cardType.textContent = AdvertParams.ACCOMMODATION_TYPES[advert.offer.type] || '';
+    cardRooms.textContent = getRoomsAndGuests(advert.offer.guests, advert.offer.rooms);
     cardTime.textContent = 'Заезд после ' + advert.offer.checkin + ', ' + 'выезд до ' + advert.offer.checkout;
-    fillFeaturesList(cardFeatures);
+    fillFeaturesList(advert.offer.features, cardFeatures);
     cardDescription.textContent = advert.offer.description;
     userAvatar.src = advert.author.avatar;
 
     return card;
+  };
+
+  /**
+   * Creates a string, indicating quantity of available rooms and
+   * possible amount of guests
+   * @param {number} guests
+   * @param {number} rooms
+   * @return {string}
+   */
+  var getRoomsAndGuests = function (guests, rooms) {
+    var guestsEnding = getEnding(guests, ['гостя', 'гостей', 'гостей']);
+    var roomsEnding = getEnding(rooms, ['комната', 'комнаты', 'комнат']);
+
+    return rooms + ' ' + roomsEnding + ' для ' + guests + ' ' + guestsEnding;
+  };
+
+  /**
+   * Creates an unsorted list of features (UL) with LI children
+   * @param {Array.<string>} advertFeatures
+   * @param {Node} featureList
+   * @return {Node}
+   */
+  var fillFeaturesList = function (advertFeatures, featureList) {
+    clearList(featureList);
+    advertFeatures.forEach(function (feature) {
+      var li = document.createElement('li');
+      li.className = 'feature feature--' + feature;
+      featureList.appendChild(li);
+    });
+
+    return featureList;
+  };
+
+  /**
+   * Accepts a DOM node and removes its child nodes
+   * @param {Node} node
+   */
+  var clearList = function (node) {
+    while (node.hasChildNodes()) {
+      node.removeChild(node.lastChild); // clear UL element
+    }
   };
 
   /**
