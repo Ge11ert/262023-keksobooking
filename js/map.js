@@ -58,12 +58,23 @@
     ARROW_HEIGHT: 18
   };
 
+  /** @enum {number} KeyCodes */
+  var KeyCodes = {
+    ENTER: 13,
+    ESC: 27
+  };
+
   var pinOffsetY = PinImageParams.HEIGHT / 2 + PinImageParams.ARROW_HEIGHT;
 
   var map = document.querySelector('.map');
   var mapPins = map.querySelector('.map__pins');
+  var mainPin = map.querySelector('.map__pin--main');
+  var currentPin = null;
   var mapCardTemplate = document.querySelector('template').content.querySelector('article.map__card');
   var filtersContainer = document.querySelector('map__filters-container');
+
+  var noticeForm = document.querySelector('.notice__form');
+  var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
 
   // -------------------------------------------------------------------
   // ------------------- Functions of MODEL component ------------------
@@ -381,9 +392,90 @@
   var adverts = createAdvertsArray();
   var mapPinsArray = createPinsFromData(adverts);
   var mapPinsFragment = renderAllPins(mapPinsArray);
-  var advCard = fillAdvertCard(adverts[0]);
+  var advCard = null;
 
-  mapPins.appendChild(mapPinsFragment);
-  map.insertBefore(advCard, filtersContainer);
-  map.classList.remove('map--faded');
+  // -------------------------------------------------------------------
+  // ------------------------ EVENTS -----------------------------------
+
+  /**
+   * Enables fields of the form and removes fading overlay from the map
+   */
+  var enableMap = function () {
+    mapPins.appendChild(mapPinsFragment);
+    map.classList.remove('map--faded');
+    noticeForm.classList.remove('notice__form--disabled');
+    setDisableProperty(noticeFieldsets, false);
+  };
+
+  /**
+   * Adds or removes 'disabled' attribute for each element of NodeList
+   * @param {NodeList} nodeList
+   * @param {boolean} isDisabled
+   */
+  var setDisableProperty = function (nodeList, isDisabled) {
+    for (var i = 0; i < nodeList.length; i++) {
+      nodeList[i].disabled = isDisabled;
+    }
+  };
+
+  /**
+   * Shows an info popup of the selected pin on the map
+   * @param {Event} evt
+   */
+  var pinClickHandler = function (evt) {
+    if (currentPin) {
+      closePinInfo();
+    }
+
+    currentPin = (evt.target.tagName === 'IMG') ? evt.target.parentNode : evt.target;
+
+    if (currentPin.classList.contains('map__pin')) {
+      currentPin.classList.add('map__pin--active');
+      if (mapPinsArray.indexOf(currentPin) !== -1) {
+        advCard = fillAdvertCard(adverts[mapPinsArray.indexOf(currentPin)]);
+        map.insertBefore(advCard, filtersContainer);
+        advCard.addEventListener('click', popupClickHandler);
+      }
+    }
+  };
+
+  /**
+   * Calls a function, when popup close-button is clicked
+   * @param {Event} evt
+   */
+  var popupClickHandler = function (evt) {
+    if (evt.target.classList.contains('popup__close')) {
+      closePinInfo();
+    }
+  };
+
+  /**
+   * Removes 'active' status of the selected pin and hides its popup card.
+   */
+  var closePinInfo = function () {
+    currentPin.classList.remove('map__pin--active');
+    if (advCard) {
+      map.removeChild(advCard);
+      advCard.removeEventListener('click', popupClickHandler);
+      advCard = null;
+    }
+  };
+
+  setDisableProperty(noticeFieldsets, true);
+
+  mainPin.addEventListener('mouseup', function () {
+    enableMap();
+  });
+  mainPin.addEventListener('keydown', function (evt) {
+    if (evt.keyCode === KeyCodes.ENTER) {
+      enableMap();
+    }
+  });
+
+  mapPins.addEventListener('click', pinClickHandler);
+  mapPins.addEventListener('keydown', function (evt) {
+    if (evt.keyCode === KeyCodes.ESC) {
+      closePinInfo();
+    }
+  });
 })();
