@@ -58,12 +58,22 @@
     ARROW_HEIGHT: 18
   };
 
+  /** @enum {number} KeyCodes */
+  var KeyCodes = {
+    ENTER: 13,
+    ESC: 27
+  };
+
   var pinOffsetY = PinImageParams.HEIGHT / 2 + PinImageParams.ARROW_HEIGHT;
 
   var map = document.querySelector('.map');
   var mapPins = map.querySelector('.map__pins');
+  var mainPin = map.querySelector('.map__pin--main');
   var mapCardTemplate = document.querySelector('template').content.querySelector('article.map__card');
   var filtersContainer = document.querySelector('map__filters-container');
+
+  var noticeForm = document.querySelector('.notice__form');
+  var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
 
   // -------------------------------------------------------------------
   // ------------------- Functions of MODEL component ------------------
@@ -232,6 +242,7 @@
 
   /**
    * Creates a DOM Element 'Map Pin' using data from a single advert
+   * and subscribes the pin to 'click' event
    * @param {Advert} advert
    * @return {Element}
    */
@@ -249,6 +260,10 @@
     pin.classList.add('map__pin');
     pin.style.left = advert.location.x + 'px';
     pin.style.top = advert.location.y - pinOffsetY + 'px';
+
+    pin.addEventListener('click', function (evt) {
+      pinClickHandler(evt, advert);
+    });
 
     return pin;
   };
@@ -381,9 +396,100 @@
   var adverts = createAdvertsArray();
   var mapPinsArray = createPinsFromData(adverts);
   var mapPinsFragment = renderAllPins(mapPinsArray);
-  var advCard = fillAdvertCard(adverts[0]);
+  var advCard = null;
 
-  mapPins.appendChild(mapPinsFragment);
-  map.insertBefore(advCard, filtersContainer);
-  map.classList.remove('map--faded');
+  // -------------------------------------------------------------------
+  // ------------------------ EVENTS -----------------------------------
+
+  /**
+   * Sets the active state of the selected pin and shows related advert card
+   * @param {Event} evt
+   * @param {Advert} advert
+   */
+  var pinClickHandler = function (evt, advert) {
+    closePinInfo();
+
+    evt.currentTarget.classList.add('map__pin--active');
+    advCard = fillAdvertCard(advert);
+    map.insertBefore(advCard, filtersContainer);
+
+    advCard.querySelector('.popup__close').addEventListener('click', function () {
+      closePinInfo();
+    });
+    mapPins.addEventListener('keydown', mapKeydownHandler);
+  };
+
+  /**
+   * Calls a function after pressing down the ESC key
+   * @param {Event} evt
+   */
+  var mapKeydownHandler = function (evt) {
+    if (evt.keyCode === KeyCodes.ESC) {
+      closePinInfo();
+    }
+  };
+
+  /**
+   * Enables fields of the form and removes fading overlay from the map
+   */
+  var enableMap = function () {
+    mapPins.appendChild(mapPinsFragment);
+    map.classList.remove('map--faded');
+    noticeForm.classList.remove('notice__form--disabled');
+    setDisableProperty(noticeFieldsets, false);
+  };
+
+  /**
+   * Adds or removes 'disabled' attribute for each element of NodeList
+   * @param {NodeList} nodeList
+   * @param {boolean} isDisabled
+   */
+  var setDisableProperty = function (nodeList, isDisabled) {
+    nodeList.forEach(function (node) {
+      node.disabled = isDisabled;
+    });
+  };
+
+  /**
+   * Removes the active state of currently active pin and hides its advert card
+   */
+  var closePinInfo = function () {
+    removeActiveState();
+    hideAdvertCard();
+    mapPins.removeEventListener('keydown', mapKeydownHandler);
+  };
+
+  /**
+   * Removes the 'active' modifier from class list of a pin
+   */
+  var removeActiveState = function () {
+    var activePin = document.querySelector('.map__pin--active');
+    if (activePin) {
+      activePin.classList.remove('map__pin--active');
+    }
+  };
+
+  /**
+   * Deletes advert card form DOM, when a pin has no 'active' state
+   */
+  var hideAdvertCard = function () {
+    if (advCard) {
+      map.removeChild(advCard);
+      advCard = null;
+    }
+  };
+
+  setDisableProperty(noticeFieldsets, true);
+
+  mainPin.addEventListener('mouseup', function (evt) {
+    evt.target.classList.add('map__pin--active');
+    enableMap();
+  });
+
+  mainPin.addEventListener('keydown', function (evt) {
+    if (evt.keyCode === KeyCodes.ENTER) {
+      enableMap();
+    }
+  });
+
 })();
