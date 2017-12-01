@@ -242,6 +242,7 @@
 
   /**
    * Creates a DOM Element 'Map Pin' using data from a single advert
+   * and subscribes the pin to 'click' event
    * @param {Advert} advert
    * @return {Element}
    */
@@ -260,12 +261,15 @@
     pin.style.left = advert.location.x + 'px';
     pin.style.top = advert.location.y - pinOffsetY + 'px';
 
+    pin.addEventListener('click', function (evt) {
+      pinClickHandler(evt, advert);
+    });
+
     return pin;
   };
 
   /**
-   * Creates an array of DOM elements 'Map pin' and subscribes
-   * each pin to a 'click' event
+   * Creates an array of DOM elements 'Map pin'
    * @param {Array.<Advert>} advertsArray
    * @return {Array.<Element>} - Array of DOM elements
    */
@@ -273,11 +277,7 @@
     var pinsArray = [];
 
     advertsArray.forEach(function (item) {
-      var newPin = renderMapPin(item);
-      pinsArray.push(newPin);
-      newPin.addEventListener('click', function (evt) {
-        pinClickHandler(evt, item);
-      });
+      pinsArray.push(renderMapPin(item));
     });
 
     return pinsArray;
@@ -402,7 +402,7 @@
   // ------------------------ EVENTS -----------------------------------
 
   /**
-   * Sets active state of the selected pin, shows related advert card
+   * Sets the active state of the selected pin and shows related advert card
    * @param {Event} evt
    * @param {Advert} advert
    */
@@ -413,15 +413,10 @@
     advCard = fillAdvertCard(advert);
     map.insertBefore(advCard, filtersContainer);
 
-    advCard.querySelector('.popup__close').addEventListener('click', popupClickHandler);
+    advCard.querySelector('.popup__close').addEventListener('click', function () {
+      closePinInfo();
+    });
     mapPins.addEventListener('keydown', mapKeydownHandler);
-  };
-
-  /**
-   * Calls a function, when close-button on the advert card is clicked
-   */
-  var popupClickHandler = function () {
-    closePinInfo();
   };
 
   /**
@@ -459,16 +454,29 @@
    * Removes the active state of currently active pin and hides its advert card
    */
   var closePinInfo = function () {
+    removeActiveState();
+    hideAdvertCard();
+    mapPins.removeEventListener('keydown', mapKeydownHandler);
+  };
+
+  /**
+   * Removes the 'active' modifier from class list of a pin
+   */
+  var removeActiveState = function () {
     var activePin = document.querySelector('.map__pin--active');
     if (activePin) {
       activePin.classList.remove('map__pin--active');
     }
+  };
+
+  /**
+   * Deletes advert card form DOM, when a pin has no 'active' state
+   */
+  var hideAdvertCard = function () {
     if (advCard) {
       map.removeChild(advCard);
-      advCard.querySelector('.popup__close').removeEventListener('click', popupClickHandler);
       advCard = null;
     }
-    mapPins.removeEventListener('keydown', mapKeydownHandler);
   };
 
   setDisableProperty(noticeFieldsets, true);
