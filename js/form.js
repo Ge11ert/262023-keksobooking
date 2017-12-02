@@ -23,12 +23,15 @@
   var addressInput = form.querySelector('#address');
   var mainPin = document.querySelector('.map__pin--main');
 
+  var guestsValue = null;
+
   /**
    * Sets the minimum acceptable value of price, according to
    * the selected type of accommodation
    */
-  var setMinPrice = function () {
+  var typeSelectChangeHandler = function () {
     priceInput.min = HousingMinPrices[typeSelect.value];
+    priceInput.placeholder = priceInput.min;
   };
 
   /**
@@ -54,20 +57,22 @@
    * Sets a value of the select2 the same, as a current value of select1
    * @param {Node} select1
    * @param {Node} select2
+   * @return {number}
    */
   var synchronizeByValue = function (select1, select2) {
     var value = select1.value;
     select2.value = (value === '100') ? 0 : value;
+    return select2.value;
   };
 
   /**
    *
    */
   var initializeForm = function () {
-    synchronizeByValue(roomsSelect, guestsSelect);
+    guestsValue = synchronizeByValue(roomsSelect, guestsSelect);
     synchronizeByIndex(checkInSelect, checkOutSelect);
-    setMinPrice();
     showAddress();
+    typeSelectChangeHandler();
   };
 
   /**
@@ -78,20 +83,22 @@
       synchronizeByIndex(checkInSelect, checkOutSelect);
     });
 
-    roomsSelect.addEventListener('change', function () {
-      synchronizeByValue(roomsSelect, guestsSelect);
+    checkOutSelect.addEventListener('change', function () {
+      synchronizeByIndex(checkOutSelect, checkInSelect);
     });
 
-    typeSelect.addEventListener('change', function () {
-      setMinPrice();
+    roomsSelect.addEventListener('change', function () {
+      guestsValue = synchronizeByValue(roomsSelect, guestsSelect);
     });
+
+    guestsSelect.addEventListener('change', function (evt) {
+      evt.target.value = guestsValue;
+    });
+
+    typeSelect.addEventListener('change', typeSelectChangeHandler);
 
     form.addEventListener('invalid', function (evt) {
-      if (evt.target.id === 'title') {
-        handleTitleInvalidity(evt.target);
-      } else if (evt.target.id === 'price') {
-        handlePriceInvalidity(evt.target);
-      }
+      ValidationTargets[evt.target.id](evt.target);
       evt.target.style.borderColor = 'red';
     }, true);
   };
@@ -130,6 +137,14 @@
     } else {
       price.setCustomValidity('');
     }
+  };
+
+  /**
+   * @enum {Object.<string, function>} ValidationTargets
+   */
+  var ValidationTargets = {
+    'title': handleTitleInvalidity,
+    'price': handlePriceInvalidity
   };
 
   initializeForm();
