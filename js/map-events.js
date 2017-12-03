@@ -8,6 +8,7 @@ window.mapEvents = (function () {
     ESC: 27
   };
 
+  var mapPinsFragment = window.mapView.mapPinsFragment;
   var advCard = null;
 
   var map = document.querySelector('.map');
@@ -50,7 +51,7 @@ window.mapEvents = (function () {
    * Enables fields of the form and removes fading overlay from the map
    */
   var enableMap = function () {
-    mapPins.appendChild(window.mapView.mapPinsFragment);
+    mapPins.appendChild(mapPinsFragment);
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');
     setDisableProperty(noticeFieldsets, false);
