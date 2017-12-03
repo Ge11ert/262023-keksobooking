@@ -70,6 +70,7 @@
    */
   var initializeForm = function () {
     guestsValue = synchronizeByValue(roomsSelect, guestsSelect);
+    disableGuestsOptions(guestsValue);
     synchronizeByIndex(checkInSelect, checkOutSelect);
     showAddress();
     typeSelectChangeHandler();
@@ -89,11 +90,12 @@
 
     roomsSelect.addEventListener('change', function () {
       guestsValue = synchronizeByValue(roomsSelect, guestsSelect);
+      disableGuestsOptions(guestsValue);
     });
 
-    guestsSelect.addEventListener('change', function (evt) {
-      evt.target.value = guestsValue;
-    });
+    // guestsSelect.addEventListener('change', function (evt) {
+    //   evt.target.value = guestsValue;
+    // });
 
     typeSelect.addEventListener('change', typeSelectChangeHandler);
 
@@ -137,6 +139,16 @@
     } else {
       price.setCustomValidity('');
     }
+  };
+
+  var disableGuestsOptions = function (currentGuests) {
+    Array.prototype.forEach.call(guestsSelect.options, function (option) {
+      if (guestsValue === '0') {
+        option.disabled = (option.value !== currentGuests);
+      } else {
+        option.disabled = (option.value > currentGuests || option.value === '0');
+      }
+    });
   };
 
   /**
