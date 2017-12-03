@@ -57,11 +57,11 @@
    * Sets a value of the select2 the same, as a current value of select1
    * @param {Node} select1
    * @param {Node} select2
-   * @return {number}
+   * @return {string}
    */
   var synchronizeByValue = function (select1, select2) {
     var value = select1.value;
-    select2.value = (value === '100') ? 0 : value;
+    select2.value = (value === '100') ? '0' : value;
     return select2.value;
   };
 
@@ -141,6 +141,10 @@
     }
   };
 
+  /**
+   * Disables all inappropriate select options
+   * @param {string} currentGuests
+   */
   var disableGuestsOptions = function (currentGuests) {
     Array.prototype.forEach.call(guestsSelect.options, function (option) {
       if (guestsValue === '0') {
