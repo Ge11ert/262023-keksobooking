@@ -1,6 +1,12 @@
 'use strict';
 
-window.utils = (function () {
+(function () {
+  /** @enum {number} KeyCodes */
+  var KeyCodes = {
+    ENTER: 13,
+    ESC: 27
+  };
+
   /**
    * Returns a random number between min and max
    * @param {number} min
@@ -40,8 +46,44 @@ window.utils = (function () {
     return newArray;
   };
 
-  return {
+  /**
+   * Accepts a DOM node and removes its child nodes
+   * @param {Node} node
+   */
+  var clearDOMNode = function (node) {
+    while (node.hasChildNodes()) {
+      node.removeChild(node.lastChild); // clear UL element
+    }
+  };
+
+  /**
+   * Returns corresponding form of a word, depending on number before the word
+   * @param {number} num - Integer
+   * @param {Array.<string>} endingForms - [For one, for 2 - 4, more than 4]
+   * @return {string}
+   */
+  var getWordEnding = function (num, endingForms) {
+    var num10 = num % 10;
+    var num100 = num % 100;
+
+    if (num10 === 1) {
+      return endingForms[0];
+    }
+    if (num10 > 1 && num10 < 5) {
+      return endingForms[1];
+    }
+    if (num100 > 5 && num100 < 20) {
+      return endingForms[2];
+    }
+
+    return endingForms[2];
+  };
+
+  window.utils = {
+    KeyCodes: KeyCodes,
     getRandomFromRange: getRandomFromRange,
-    getRandomArrayCopy: getRandomArrayCopy
+    getRandomArrayCopy: getRandomArrayCopy,
+    clearDOMNode: clearDOMNode,
+    getWordEnding: getWordEnding
   };
 })();
