@@ -45,6 +45,12 @@
     MAX_GUESTS: 7
   };
 
+  /** @enum {number} KeyCodes */
+  var KeyCodes = {
+    ENTER: 13,
+    ESC: 27
+  };
+
   var map = document.querySelector('.map');
   var mapPins = map.querySelector('.map__pins');
   var mainPin = map.querySelector('.map__pin--main');
@@ -183,7 +189,7 @@
     var pinsArray = [];
 
     advertsArray.forEach(function (item) {
-      pinsArray.push(window.renderMapPin(item));
+      pinsArray.push(window.pin.renderPin(item));
     });
 
     return pinsArray;
@@ -229,6 +235,24 @@
     });
   };
 
+  /**
+   * Calls a function after pressing down the ESC key
+   * @param {Event} evt
+   */
+  var mapKeydownHandler = function (evt) {
+    if (evt.keyCode === KeyCodes.ESC) {
+      window.pin.closePinInfo();
+    }
+  };
+
+  var bindKeydownEvent = function () {
+    mapPins.addEventListener('keydown', mapKeydownHandler);
+  };
+
+  var removeKyedownEvent = function () {
+    mapPins.removeEventListener('keydown', mapKeydownHandler);
+  };
+
   setDisableProperty(noticeFieldsets, true);
 
   mainPin.addEventListener('mouseup', function (evt) {
@@ -237,8 +261,13 @@
   });
 
   mainPin.addEventListener('keydown', function (evt) {
-    if (evt.keyCode === window.utils.KeyCodes.ENTER) {
+    if (evt.keyCode === KeyCodes.ENTER) {
       enableMap();
     }
   });
+
+  window.map = {
+    bindKeydownEvent: bindKeydownEvent,
+    removeKeydownEvent: removeKyedownEvent
+  };
 })();

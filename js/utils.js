@@ -1,12 +1,6 @@
 'use strict';
 
 (function () {
-  /** @enum {number} KeyCodes */
-  var KeyCodes = {
-    ENTER: 13,
-    ESC: 27
-  };
-
   /**
    * Returns a random number between min and max
    * @param {number} min
@@ -80,7 +74,6 @@
   };
 
   window.utils = {
-    KeyCodes: KeyCodes,
     getRandomFromRange: getRandomFromRange,
     getRandomArrayCopy: getRandomArrayCopy,
     clearDOMNode: clearDOMNode,

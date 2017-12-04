@@ -12,6 +12,9 @@
   };
 
   var mapCardTemplate = document.querySelector('template').content.querySelector('article.map__card');
+  var map = document.querySelector('.map');
+  var filtersContainer = document.querySelector('map__filters-container');
+  var advCard = null;
 
   /**
    * Fills a DOM Node 'Advert card' with data from a single advert object
@@ -75,5 +78,27 @@
     return featureList;
   };
 
-  window.fillAdvertCard = fillAdvertCard;
+  var showCard = function (advert) {
+    advCard = fillAdvertCard(advert);
+    map.insertBefore(advCard, filtersContainer);
+
+    advCard.querySelector('.popup__close').addEventListener('click', function () {
+      window.pin.closePinInfo();
+    });
+  };
+
+  /**
+   * Deletes advert card form DOM, when a pin has no 'active' state
+   */
+  var hideCard = function () {
+    if (advCard) {
+      map.removeChild(advCard);
+      advCard = null;
+    }
+  };
+
+  window.card = {
+    showCard: showCard,
+    hideCard: hideCard
+  };
 })();

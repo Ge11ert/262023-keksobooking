@@ -9,11 +9,6 @@
   };
 
   var pinOffsetY = PinImageParams.HEIGHT / 2 + PinImageParams.ARROW_HEIGHT;
-  var advCard = null;
-
-  var map = document.querySelector('.map');
-  var mapPins = map.querySelector('.map__pins');
-  var filtersContainer = document.querySelector('map__filters-container');
 
   /**
    * Creates a DOM Element 'Map Pin' using data from a single advert
@@ -21,7 +16,7 @@
    * @param {Advert} advert
    * @return {Element}
    */
-  var renderMapPin = function (advert) {
+  var renderPin = function (advert) {
     var pin = document.createElement('button');
     var avatar = document.createElement('img');
 
@@ -44,16 +39,6 @@
   };
 
   /**
-   * Calls a function after pressing down the ESC key
-   * @param {Event} evt
-   */
-  var mapKeydownHandler = function (evt) {
-    if (evt.keyCode === window.utils.KeyCodes.ESC) {
-      closePinInfo();
-    }
-  };
-
-  /**
    * Sets the active state of the selected pin and shows related advert card
    * @param {Event} evt
    * @param {Advert} advert
@@ -62,13 +47,8 @@
     closePinInfo();
 
     evt.currentTarget.classList.add('map__pin--active');
-    advCard = window.fillAdvertCard(advert);
-    map.insertBefore(advCard, filtersContainer);
-
-    advCard.querySelector('.popup__close').addEventListener('click', function () {
-      closePinInfo();
-    });
-    mapPins.addEventListener('keydown', mapKeydownHandler);
+    window.card.showCard(advert);
+    window.map.bindKeydownEvent();
   };
 
   /**
@@ -76,8 +56,8 @@
    */
   var closePinInfo = function () {
     removeActiveState();
-    hideAdvertCard();
-    mapPins.removeEventListener('keydown', mapKeydownHandler);
+    window.card.hideCard();
+    window.map.removeKeydownEvent();
   };
 
   /**
@@ -90,15 +70,8 @@
     }
   };
 
-  /**
-   * Deletes advert card form DOM, when a pin has no 'active' state
-   */
-  var hideAdvertCard = function () {
-    if (advCard) {
-      map.removeChild(advCard);
-      advCard = null;
-    }
+  window.pin = {
+    renderPin: renderPin,
+    closePinInfo: closePinInfo
   };
-
-  window.renderMapPin = renderMapPin;
 })();
