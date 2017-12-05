@@ -82,11 +82,19 @@
     return featureList;
   };
 
+  /**
+   * Creates a DOM Node, filled with data from an advert,
+   * and sends it to map module
+   * @param {Advert} advert
+   */
   var createCard = function (advert) {
+    if (advCard) {
+      hideCard();
+    }
     advCard = fillAdvertCard(advert);
     advCard.querySelector('.popup__close').addEventListener('click', function () {
       hideCard();
-      window.pin.removeActiveState();
+      window.pin.deactivate();
     });
 
     document.addEventListener('keydown', cardKeydownHandler);
@@ -94,10 +102,11 @@
   };
 
   /**
-   * Deletes advert card form DOM, when a pin has no 'active' state
+   * Deletes a card of an advert form DOM
    */
   var hideCard = function () {
     advCard.parentNode.removeChild(advCard);
+    advCard = null;
     document.removeEventListener('keydown', cardKeydownHandler);
   };
 
@@ -108,12 +117,9 @@
   var cardKeydownHandler = function (evt) {
     if (evt.keyCode === KeyCodes.ESC) {
       hideCard();
-      window.pin.removeActiveState();
+      window.pin.deactivate();
     }
   };
 
-  window.card = {
-    create: createCard,
-    hide: hideCard
-  };
+  window.createCard = createCard;
 })();

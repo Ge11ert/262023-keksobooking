@@ -47,12 +47,11 @@
   var pinClickHandler = function (evt, advert) {
     if (activePin) {
       removeActiveState();
-      window.card.hide();
     }
 
     evt.currentTarget.classList.add('map__pin--active');
     activePin = evt.currentTarget;
-    window.card.create(advert);
+    window.createCard(advert);
   };
 
   /**
@@ -65,6 +64,6 @@
 
   window.pin = {
     render: renderPin,
-    removeActiveState: removeActiveState
+    deactivate: removeActiveState
   };
 })();
