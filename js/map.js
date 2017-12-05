@@ -211,26 +211,9 @@
     return fragment;
   };
 
-  var insertExternalNode = function (card) {
-    map.insertBefore(card, filtersContainer);
+  var insertExternalNode = function (node) {
+    map.insertBefore(node, filtersContainer);
   };
-
-  var removeNode = function (card) {
-    map.removeChild(card);
-  };
-
-  var Actions = {
-    'insert': insertExternalNode,
-    'remove': removeNode
-  };
-
-  var toggleNodePresence = function (node, action) {
-    Actions[action](node);
-  };
-
-  var adverts = createAdvertsArray();
-  var mapPinsArray = createPinsFromData(adverts);
-  var mapPinsFragment = renderAllPins(mapPinsArray);
 
   /**
    * Enables fields of the form and removes fading overlay from the map
@@ -253,6 +236,10 @@
     });
   };
 
+  var adverts = createAdvertsArray();
+  var mapPinsArray = createPinsFromData(adverts);
+  var mapPinsFragment = renderAllPins(mapPinsArray);
+
   setDisableProperty(noticeFieldsets, true);
 
   mainPin.addEventListener('mouseup', function (evt) {
@@ -266,5 +253,5 @@
     }
   });
 
-  window.toggleNodePresence = toggleNodePresence;
+  window.insertExternalNode = insertExternalNode;
 })();

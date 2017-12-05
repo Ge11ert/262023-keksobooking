@@ -90,14 +90,14 @@
     });
 
     document.addEventListener('keydown', cardKeydownHandler);
-    window.toggleNodePresence(advCard, 'insert');
+    window.insertExternalNode(advCard);
   };
 
   /**
    * Deletes advert card form DOM, when a pin has no 'active' state
    */
   var hideCard = function () {
-    window.toggleNodePresence(advCard, 'remove');
+    advCard.parentNode.removeChild(advCard);
     document.removeEventListener('keydown', cardKeydownHandler);
   };
 
