@@ -9,6 +9,7 @@
   };
 
   var pinOffsetY = PinImageParams.HEIGHT / 2 + PinImageParams.ARROW_HEIGHT;
+  var activePin = null;
 
   /**
    * Creates a DOM Element 'Map Pin' using data from a single advert
@@ -44,34 +45,26 @@
    * @param {Advert} advert
    */
   var pinClickHandler = function (evt, advert) {
-    closePinInfo();
+    if (activePin) {
+      removeActiveState();
+      window.card.hide();
+    }
 
     evt.currentTarget.classList.add('map__pin--active');
-    window.card.showCard(advert);
-    window.map.bindKeydownEvent();
-  };
-
-  /**
-   * Removes the active state of currently active pin and hides its advert card
-   */
-  var closePinInfo = function () {
-    removeActiveState();
-    window.card.hideCard();
-    window.map.removeKeydownEvent();
+    activePin = evt.currentTarget;
+    window.card.create(advert);
   };
 
   /**
    * Removes the 'active' modifier from class list of a pin
    */
   var removeActiveState = function () {
-    var activePin = document.querySelector('.map__pin--active');
-    if (activePin) {
-      activePin.classList.remove('map__pin--active');
-    }
+    activePin.classList.remove('map__pin--active');
+    activePin = null;
   };
 
   window.pin = {
-    renderPin: renderPin,
-    closePinInfo: closePinInfo
+    render: renderPin,
+    removeActiveState: removeActiveState
   };
 })();

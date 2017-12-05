@@ -54,6 +54,7 @@
   var map = document.querySelector('.map');
   var mapPins = map.querySelector('.map__pins');
   var mainPin = map.querySelector('.map__pin--main');
+  var filtersContainer = document.querySelector('map__filters-container');
 
   var noticeForm = document.querySelector('.notice__form');
   var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
@@ -189,7 +190,7 @@
     var pinsArray = [];
 
     advertsArray.forEach(function (item) {
-      pinsArray.push(window.pin.renderPin(item));
+      pinsArray.push(window.pin.render(item));
     });
 
     return pinsArray;
@@ -208,6 +209,23 @@
     });
 
     return fragment;
+  };
+
+  var insertExternalNode = function (card) {
+    map.insertBefore(card, filtersContainer);
+  };
+
+  var removeNode = function (card) {
+    map.removeChild(card);
+  };
+
+  var Actions = {
+    'insert': insertExternalNode,
+    'remove': removeNode
+  };
+
+  var toggleNodePresence = function (node, action) {
+    Actions[action](node);
   };
 
   var adverts = createAdvertsArray();
@@ -235,24 +253,6 @@
     });
   };
 
-  /**
-   * Calls a function after pressing down the ESC key
-   * @param {Event} evt
-   */
-  var mapKeydownHandler = function (evt) {
-    if (evt.keyCode === KeyCodes.ESC) {
-      window.pin.closePinInfo();
-    }
-  };
-
-  var bindKeydownEvent = function () {
-    mapPins.addEventListener('keydown', mapKeydownHandler);
-  };
-
-  var removeKyedownEvent = function () {
-    mapPins.removeEventListener('keydown', mapKeydownHandler);
-  };
-
   setDisableProperty(noticeFieldsets, true);
 
   mainPin.addEventListener('mouseup', function (evt) {
@@ -266,8 +266,5 @@
     }
   });
 
-  window.map = {
-    bindKeydownEvent: bindKeydownEvent,
-    removeKeydownEvent: removeKyedownEvent
-  };
+  window.toggleNodePresence = toggleNodePresence;
 })();

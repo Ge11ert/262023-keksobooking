@@ -11,9 +11,13 @@
     'bungalo': 'Бунгало'
   };
 
-  var mapCardTemplate = document.querySelector('template').content.querySelector('article.map__card');
-  var map = document.querySelector('.map');
-  var filtersContainer = document.querySelector('map__filters-container');
+  /** @enum {number} KeyCodes */
+  var KeyCodes = {
+    ENTER: 13,
+    ESC: 27
+  };
+
+  var cardTemplate = document.querySelector('template').content.querySelector('article.map__card');
   var advCard = null;
 
   /**
@@ -22,7 +26,7 @@
    * @return {Node}
    */
   var fillAdvertCard = function (advert) {
-    var card = mapCardTemplate.cloneNode(true);
+    var card = cardTemplate.cloneNode(true);
 
     var cardTitle = card.querySelector('h3');
     var cardAddress = card.querySelector('small');
@@ -78,27 +82,38 @@
     return featureList;
   };
 
-  var showCard = function (advert) {
+  var createCard = function (advert) {
     advCard = fillAdvertCard(advert);
-    map.insertBefore(advCard, filtersContainer);
-
     advCard.querySelector('.popup__close').addEventListener('click', function () {
-      window.pin.closePinInfo();
+      hideCard();
+      window.pin.removeActiveState();
     });
+
+    document.addEventListener('keydown', cardKeydownHandler);
+    window.toggleNodePresence(advCard, 'insert');
   };
 
   /**
    * Deletes advert card form DOM, when a pin has no 'active' state
    */
   var hideCard = function () {
-    if (advCard) {
-      map.removeChild(advCard);
-      advCard = null;
+    window.toggleNodePresence(advCard, 'remove');
+    document.removeEventListener('keydown', cardKeydownHandler);
+  };
+
+  /**
+   * Calls a function after pressing down the ESC key
+   * @param {Event} evt
+   */
+  var cardKeydownHandler = function (evt) {
+    if (evt.keyCode === KeyCodes.ESC) {
+      hideCard();
+      window.pin.removeActiveState();
     }
   };
 
   window.card = {
-    showCard: showCard,
-    hideCard: hideCard
+    create: createCard,
+    hide: hideCard
   };
 })();
