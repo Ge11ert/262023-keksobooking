@@ -51,6 +51,21 @@
     ESC: 27
   };
 
+  /** @enum {number} MainPinParams */
+  var MainPinParams = {
+    WIDTH: 64,
+    HEIGHT: 64,
+    ARROW_HEIGHT: 22
+  };
+
+  var pinOffsetY = MainPinParams.HEIGHT / 2 + MainPinParams.ARROW_HEIGHT;
+
+  /** @enum {number} MapConstraints */
+  var MapConstraints = {
+    TOP: AdvertParams.LOCATION_BORDERS.Y_MIN - pinOffsetY,
+    BOTTOM: AdvertParams.LOCATION_BORDERS.Y_MAX - pinOffsetY
+  };
+
   var map = document.querySelector('.map');
   var mapPins = map.querySelector('.map__pins');
   var mainPin = map.querySelector('.map__pin--main');
@@ -242,9 +257,66 @@
 
   setDisableProperty(noticeFieldsets, true);
 
-  mainPin.addEventListener('mouseup', function (evt) {
-    evt.target.classList.add('map__pin--active');
-    enableMap();
+  mainPin.addEventListener('mousedown', function (evt) {
+    var startCoords = {
+      x: evt.clientX,
+      y: evt.clientY
+    };
+
+    var freeze = {
+      atBottom: false,
+      atTop: false
+    };
+
+    /**
+     * Manages a 'drag' action of the main pin of the map.
+     * Movement of the pin is bound to position of the cursor
+     * @param {Event} moveEvt
+     */
+    var pinMouseMoveHandler = function (moveEvt) {
+      var shift = {
+        x: moveEvt.clientX - startCoords.x,
+        y: moveEvt.clientY - startCoords.y
+      };
+
+      if (!(freeze.atBottom || freeze.atTop)) {
+        freeze.atBottom = mainPin.offsetTop + shift.y > MapConstraints.BOTTOM; // sets to TRUE, if we cross the bottom border
+        freeze.atTop = mainPin.offsetTop + shift.y < MapConstraints.TOP; // sets to TRUE, if we cross the top border
+      }
+
+      if (freeze.atBottom || freeze.atTop) {
+        shift.y = 0;
+        freeze.atBottom = !(moveEvt.pageY < MapConstraints.BOTTOM); // sets to FALSE, when we get back in allowable area
+        freeze.atTop = !(moveEvt.pageY > MapConstraints.TOP); // sets to FALSE, when we get back in allowable area
+      }
+
+      var currentCoords = {
+        x: mainPin.offsetLeft + shift.x,
+        y: mainPin.offsetTop + shift.y
+      };
+
+      startCoords = {
+        x: moveEvt.clientX,
+        y: moveEvt.clientY
+      };
+
+      mainPin.style.top = (currentCoords.y) + 'px';
+      mainPin.style.left = (currentCoords.x) + 'px';
+
+      window.showAddress(currentCoords.x, currentCoords.y + pinOffsetY);
+    };
+
+    var pinMouseUpHandler = function () {
+      mainPin.classList.remove('map__pin--active');
+      enableMap();
+
+      document.removeEventListener('mousemove', pinMouseMoveHandler);
+      document.removeEventListener('mouseup', pinMouseUpHandler);
+    };
+
+    mainPin.classList.add('map__pin--active');
+    document.addEventListener('mousemove', pinMouseMoveHandler);
+    document.addEventListener('mouseup', pinMouseUpHandler);
   });
 
   mainPin.addEventListener('keydown', function (evt) {

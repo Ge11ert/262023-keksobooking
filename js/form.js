@@ -11,6 +11,11 @@
     'palace': 10000
   };
 
+  var initialAddress = {
+    x: '600px',
+    y: '375px'
+  };
+
   var form = document.querySelector('.notice__form');
   var checkInSelect = form.querySelector('#timein');
   var checkOutSelect = form.querySelector('#timeout');
@@ -21,7 +26,6 @@
   var typeSelect = form.querySelector('#type');
   var priceInput = form.querySelector('#price');
   var addressInput = form.querySelector('#address');
-  var mainPin = document.querySelector('.map__pin--main');
 
   var guestsValue = null;
 
@@ -36,11 +40,13 @@
 
   /**
    * Fills in the address input with initial position of the main pin
+   * @param {string} left
+   * @param {string} top
    */
-  var showAddress = function () {
-    var left = parseInt(getComputedStyle(mainPin).getPropertyValue('left'), 10);
-    var top = parseInt(getComputedStyle(mainPin).getPropertyValue('top'), 10);
-    addressInput.value = left + ' ' + top;
+  var showAddress = function (left, top) {
+    var x = parseInt(left, 10);
+    var y = parseInt(top, 10);
+    addressInput.value = x + ' ' + y;
   };
 
   /**
@@ -72,7 +78,7 @@
     guestsValue = synchronizeByValue(roomsSelect, guestsSelect);
     disableGuestsOptions(guestsValue);
     synchronizeByIndex(checkInSelect, checkOutSelect);
-    showAddress();
+    showAddress(initialAddress.x, initialAddress.y);
     typeSelectChangeHandler();
   };
 
@@ -92,10 +98,6 @@
       guestsValue = synchronizeByValue(roomsSelect, guestsSelect);
       disableGuestsOptions(guestsValue);
     });
-
-    // guestsSelect.addEventListener('change', function (evt) {
-    //   evt.target.value = guestsValue;
-    // });
 
     typeSelect.addEventListener('change', typeSelectChangeHandler);
 
@@ -165,4 +167,6 @@
 
   initializeForm();
   bindEvents();
+
+  window.showAddress = showAddress;
 })();
