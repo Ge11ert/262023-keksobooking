@@ -12,8 +12,8 @@
   };
 
   var initialAddress = {
-    x: '600px',
-    y: '375px'
+    x: 600,
+    y: 429
   };
 
   var form = document.querySelector('.notice__form');
@@ -39,13 +39,11 @@
   };
 
   /**
-   * Fills in the address input with initial position of the main pin
-   * @param {string} left
-   * @param {string} top
+   * Fills in the address input with position of the main pin
+   * @param {number} x
+   * @param {number} y
    */
-  var showAddress = function (left, top) {
-    var x = parseInt(left, 10);
-    var y = parseInt(top, 10);
+  var showAddress = function (x, y) {
     addressInput.value = x + ' ' + y;
   };
 
@@ -72,7 +70,7 @@
   };
 
   /**
-   *
+   * Sets all values to valid form after form enabling
    */
   var initializeForm = function () {
     guestsValue = synchronizeByValue(roomsSelect, guestsSelect);
