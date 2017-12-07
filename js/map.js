@@ -60,12 +60,6 @@
 
   var pinOffsetY = MainPinParams.HEIGHT / 2 + MainPinParams.ARROW_HEIGHT;
 
-  /** @enum {number} MapConstraints */
-  var MapConstraints = {
-    TOP: AdvertParams.LOCATION_BORDERS.Y_MIN - pinOffsetY,
-    BOTTOM: AdvertParams.LOCATION_BORDERS.Y_MAX - pinOffsetY
-  };
-
   var map = document.querySelector('.map');
   var mapPins = map.querySelector('.map__pins');
   var mainPin = map.querySelector('.map__pin--main');
@@ -73,6 +67,16 @@
 
   var noticeForm = document.querySelector('.notice__form');
   var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
+
+  var mapPadding = (document.documentElement.offsetWidth - map.offsetWidth) / 2;
+
+  /** @enum {number} MapConstraints */
+  var MapConstraints = {
+    TOP: AdvertParams.LOCATION_BORDERS.Y_MIN - pinOffsetY,
+    BOTTOM: AdvertParams.LOCATION_BORDERS.Y_MAX - pinOffsetY,
+    LEFT: AdvertParams.LOCATION_BORDERS.X_MIN,
+    RIGHT: AdvertParams.LOCATION_BORDERS.X_MAX
+  };
 
   // -------------------------------------------------------------------
   // ------------------- Functions of MODEL component ------------------
@@ -265,8 +269,13 @@
 
     var freeze = {
       atBottom: false,
-      atTop: false
+      atTop: false,
+      atLeft: false,
+      atRight: false
     };
+
+    mainPin.style.cursor = 'none';
+    document.documentElement.style.cursor = 'none';
 
     /**
      * Manages a 'drag' action of the main pin of the map.
@@ -284,10 +293,21 @@
         freeze.atTop = mainPin.offsetTop + shift.y < MapConstraints.TOP; // sets to TRUE, if we cross the top border
       }
 
+      if (!(freeze.atLeft || freeze.atRight)) {
+        freeze.atLeft = mainPin.offsetLeft + shift.x < MapConstraints.LEFT;
+        freeze.atRight = mainPin.offsetLeft + shift.x > MapConstraints.RIGHT;
+      }
+
       if (freeze.atBottom || freeze.atTop) {
         shift.y = 0;
         freeze.atBottom = !(moveEvt.pageY < MapConstraints.BOTTOM); // sets to FALSE, when we get back in allowable area
         freeze.atTop = !(moveEvt.pageY > MapConstraints.TOP); // sets to FALSE, when we get back in allowable area
+      }
+
+      if (freeze.atLeft || freeze.atRight) {
+        shift.x = 0;
+        freeze.atLeft = !(moveEvt.pageX > MapConstraints.LEFT + mapPadding);
+        freeze.atRight = !(moveEvt.pageX < MapConstraints.RIGHT + mapPadding);
       }
 
       var currentCoords = {
@@ -303,18 +323,21 @@
       mainPin.style.top = (currentCoords.y) + 'px';
       mainPin.style.left = (currentCoords.x) + 'px';
 
-      window.showAddress(currentCoords.x, currentCoords.y + pinOffsetY);
+      window.setAddress(currentCoords.x, currentCoords.y + pinOffsetY);
     };
 
     var pinMouseUpHandler = function () {
       mainPin.classList.remove('map__pin--active');
       enableMap();
 
+      mainPin.style.cursor = 'move';
+      document.documentElement.style.cursor = 'auto';
       document.removeEventListener('mousemove', pinMouseMoveHandler);
       document.removeEventListener('mouseup', pinMouseUpHandler);
     };
 
     mainPin.classList.add('map__pin--active');
+    // mainPin.style.cursor = 'none';
     document.addEventListener('mousemove', pinMouseMoveHandler);
     document.addEventListener('mouseup', pinMouseUpHandler);
   });

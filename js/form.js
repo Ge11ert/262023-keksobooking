@@ -43,7 +43,7 @@
    * @param {number} x
    * @param {number} y
    */
-  var showAddress = function (x, y) {
+  var setAddress = function (x, y) {
     addressInput.value = x + ' ' + y;
   };
 
@@ -76,7 +76,7 @@
     guestsValue = synchronizeByValue(roomsSelect, guestsSelect);
     disableGuestsOptions(guestsValue);
     synchronizeByIndex(checkInSelect, checkOutSelect);
-    showAddress(initialAddress.x, initialAddress.y);
+    setAddress(initialAddress.x, initialAddress.y);
     typeSelectChangeHandler();
   };
 
@@ -166,5 +166,5 @@
   initializeForm();
   bindEvents();
 
-  window.showAddress = showAddress;
+  window.setAddress = setAddress;
 })();
