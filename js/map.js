@@ -68,14 +68,12 @@
   var noticeForm = document.querySelector('.notice__form');
   var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
 
-  var mapPadding = (document.documentElement.offsetWidth - map.offsetWidth) / 2;
-
   /** @enum {number} MapConstraints */
   var MapConstraints = {
     TOP: AdvertParams.LOCATION_BORDERS.Y_MIN - pinOffsetY,
     BOTTOM: AdvertParams.LOCATION_BORDERS.Y_MAX - pinOffsetY,
-    LEFT: AdvertParams.LOCATION_BORDERS.X_MIN,
-    RIGHT: AdvertParams.LOCATION_BORDERS.X_MAX
+    LEFT: MainPinParams.WIDTH / 2,
+    RIGHT: map.clientWidth - MainPinParams.WIDTH / 2
   };
 
   // -------------------------------------------------------------------
@@ -267,13 +265,6 @@
       y: evt.clientY
     };
 
-    var freeze = {
-      atBottom: false,
-      atTop: false,
-      atLeft: false,
-      atRight: false
-    };
-
     mainPin.style.cursor = 'none';
     document.documentElement.style.cursor = 'none';
 
@@ -288,32 +279,26 @@
         y: moveEvt.clientY - startCoords.y
       };
 
-      if (!(freeze.atBottom || freeze.atTop)) {
-        freeze.atBottom = mainPin.offsetTop + shift.y > MapConstraints.BOTTOM; // sets to TRUE, if we cross the bottom border
-        freeze.atTop = mainPin.offsetTop + shift.y < MapConstraints.TOP; // sets to TRUE, if we cross the top border
-      }
-
-      if (!(freeze.atLeft || freeze.atRight)) {
-        freeze.atLeft = mainPin.offsetLeft + shift.x < MapConstraints.LEFT;
-        freeze.atRight = mainPin.offsetLeft + shift.x > MapConstraints.RIGHT;
-      }
-
-      if (freeze.atBottom || freeze.atTop) {
-        shift.y = 0;
-        freeze.atBottom = !(moveEvt.pageY < MapConstraints.BOTTOM); // sets to FALSE, when we get back in allowable area
-        freeze.atTop = !(moveEvt.pageY > MapConstraints.TOP); // sets to FALSE, when we get back in allowable area
-      }
-
-      if (freeze.atLeft || freeze.atRight) {
-        shift.x = 0;
-        freeze.atLeft = !(moveEvt.pageX > MapConstraints.LEFT + mapPadding);
-        freeze.atRight = !(moveEvt.pageX < MapConstraints.RIGHT + mapPadding);
-      }
-
       var currentCoords = {
         x: mainPin.offsetLeft + shift.x,
         y: mainPin.offsetTop + shift.y
       };
+
+      if (currentCoords.x < MapConstraints.LEFT) {
+        currentCoords.x = MapConstraints.LEFT;
+      }
+
+      if (currentCoords.x > MapConstraints.RIGHT) {
+        currentCoords.x = MapConstraints.RIGHT;
+      }
+
+      if (currentCoords.y < MapConstraints.TOP) {
+        currentCoords.y = MapConstraints.TOP;
+      }
+
+      if (currentCoords.y > MapConstraints.BOTTOM) {
+        currentCoords.y = MapConstraints.BOTTOM;
+      }
 
       startCoords = {
         x: moveEvt.clientX,
