@@ -1,16 +1,6 @@
 'use strict';
 
 (function () {
-  /**
-   * @enum {number} HousingMinPrices
-   */
-  var HousingMinPrices = {
-    'bungalo': 0,
-    'flat': 1000,
-    'house': 5000,
-    'palace': 10000
-  };
-
   var initialAddress = {
     x: 600,
     y: 429
@@ -27,17 +17,6 @@
   var priceInput = form.querySelector('#price');
   var addressInput = form.querySelector('#address');
 
-  var guestsValue = null;
-
-  /**
-   * Sets the minimum acceptable value of price, according to
-   * the selected type of accommodation
-   */
-  var typeSelectChangeHandler = function () {
-    priceInput.min = HousingMinPrices[typeSelect.value];
-    priceInput.placeholder = priceInput.min;
-  };
-
   /**
    * Fills in the address input with position of the main pin
    * @param {number} x
@@ -48,36 +27,36 @@
   };
 
   /**
-   * Gets an index of the selected option from 'select1' and selects the option
-   * from 'select2' with the same index
-   * @param {Node} select1
-   * @param {Node} select2
+   * Sets 'value' attribute of an element according to the provided value
+   * @param {HTMLElement} element
+   * @param {string|number} value
    */
-  var synchronizeByIndex = function (select1, select2) {
-    select2.options[select1.selectedIndex].selected = 'selected';
+  var syncValues = function (element, value) {
+    element.value = value;
   };
 
   /**
-   * Sets a value of the select2 the same, as a current value of select1
-   * @param {Node} select1
-   * @param {Node} select2
-   * @return {string}
+   * Sets 'min' attribute of an element according to the provided value
+   * Indicates min value in elements placeholder, if the element has it
+   * @param {HTMLElement} element
+   * @param {number} value
    */
-  var synchronizeByValue = function (select1, select2) {
-    var value = select1.value;
-    select2.value = (value === '100') ? '0' : value;
-    return select2.value;
+  var syncValueWithMin = function (element, value) {
+    element.min = value;
+    if (element.placeholder) {
+      element.placeholder = value;
+    }
   };
 
   /**
    * Sets all values to valid form after form enabling
    */
   var initializeForm = function () {
-    guestsValue = synchronizeByValue(roomsSelect, guestsSelect);
-    disableGuestsOptions(guestsValue);
-    synchronizeByIndex(checkInSelect, checkOutSelect);
+    window.synchronizeFields(roomsSelect, guestsSelect, ['1', '2', '3', '100'], ['1', '2', '3', '0'], syncValues);
+    window.synchronizeFields(checkInSelect, checkOutSelect, ['12:00', '13:00', '14:00'], ['12:00', '13:00', '14:00'], syncValues);
+    window.synchronizeFields(typeSelect, priceInput, ['bungalo', 'flat', 'house', 'palace'], [0, 1000, 5000, 10000], syncValueWithMin);
+    disableGuestsOptions(guestsSelect.value);
     setAddress(initialAddress.x, initialAddress.y);
-    typeSelectChangeHandler();
   };
 
   /**
@@ -85,19 +64,21 @@
    */
   var bindEvents = function () {
     checkInSelect.addEventListener('change', function () {
-      synchronizeByIndex(checkInSelect, checkOutSelect);
+      window.synchronizeFields(checkInSelect, checkOutSelect, ['12:00', '13:00', '14:00'], ['12:00', '13:00', '14:00'], syncValues);
     });
 
     checkOutSelect.addEventListener('change', function () {
-      synchronizeByIndex(checkOutSelect, checkInSelect);
+      window.synchronizeFields(checkOutSelect, checkInSelect, ['12:00', '13:00', '14:00'], ['12:00', '13:00', '14:00'], syncValues);
     });
 
     roomsSelect.addEventListener('change', function () {
-      guestsValue = synchronizeByValue(roomsSelect, guestsSelect);
-      disableGuestsOptions(guestsValue);
+      window.synchronizeFields(roomsSelect, guestsSelect, ['1', '2', '3', '100'], ['1', '2', '3', '0'], syncValues);
+      disableGuestsOptions(guestsSelect.value);
     });
 
-    typeSelect.addEventListener('change', typeSelectChangeHandler);
+    typeSelect.addEventListener('change', function () {
+      window.synchronizeFields(typeSelect, priceInput, ['bungalo', 'flat', 'house', 'palace'], [0, 1000, 5000, 10000], syncValueWithMin);
+    });
 
     form.addEventListener('invalid', function (evt) {
       ValidationTargets[evt.target.id](evt.target);
@@ -147,7 +128,7 @@
    */
   var disableGuestsOptions = function (currentGuests) {
     Array.prototype.forEach.call(guestsSelect.options, function (option) {
-      if (guestsValue === '0') {
+      if (guestsSelect.value === '0') {
         option.disabled = (option.value !== currentGuests);
       } else {
         option.disabled = (option.value > currentGuests || option.value === '0');
