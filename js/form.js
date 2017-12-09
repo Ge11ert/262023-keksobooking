@@ -6,6 +6,17 @@
     y: 429
   };
 
+  /**
+   * @enum {Array} FormFieldsParams
+   * */
+  var FormFieldsParams = {
+    TIME_OPTIONS: ['12:00', '13:00', '14:00'],
+    ROOMS_OPTIONS: ['1', '2', '3', '100'],
+    GUESTS_OPTIONS: ['1', '2', '3', '0'],
+    APARTMENTS_OPTIONS: ['bungalo', 'flat', 'house', 'palace'],
+    PRICE_OPTIONS: [0, 1000, 5000, 10000]
+  };
+
   var form = document.querySelector('.notice__form');
   var checkInSelect = form.querySelector('#timein');
   var checkOutSelect = form.querySelector('#timeout');
@@ -52,9 +63,9 @@
    * Sets all values to valid form after form enabling
    */
   var initializeForm = function () {
-    window.synchronizeFields(roomsSelect, guestsSelect, ['1', '2', '3', '100'], ['1', '2', '3', '0'], syncValues);
-    window.synchronizeFields(checkInSelect, checkOutSelect, ['12:00', '13:00', '14:00'], ['12:00', '13:00', '14:00'], syncValues);
-    window.synchronizeFields(typeSelect, priceInput, ['bungalo', 'flat', 'house', 'palace'], [0, 1000, 5000, 10000], syncValueWithMin);
+    window.synchronizeFields(roomsSelect, guestsSelect, FormFieldsParams.ROOMS_OPTIONS, FormFieldsParams.GUESTS_OPTIONS, syncValues);
+    window.synchronizeFields(checkInSelect, checkOutSelect, FormFieldsParams.TIME_OPTIONS, FormFieldsParams.TIME_OPTIONS, syncValues);
+    window.synchronizeFields(typeSelect, priceInput, FormFieldsParams.APARTMENTS_OPTIONS, FormFieldsParams.PRICE_OPTIONS, syncValueWithMin);
     disableGuestsOptions(guestsSelect.value);
     setAddress(initialAddress.x, initialAddress.y);
   };
@@ -64,20 +75,20 @@
    */
   var bindEvents = function () {
     checkInSelect.addEventListener('change', function () {
-      window.synchronizeFields(checkInSelect, checkOutSelect, ['12:00', '13:00', '14:00'], ['12:00', '13:00', '14:00'], syncValues);
+      window.synchronizeFields(checkInSelect, checkOutSelect, FormFieldsParams.TIME_OPTIONS, FormFieldsParams.TIME_OPTIONS, syncValues);
     });
 
     checkOutSelect.addEventListener('change', function () {
-      window.synchronizeFields(checkOutSelect, checkInSelect, ['12:00', '13:00', '14:00'], ['12:00', '13:00', '14:00'], syncValues);
+      window.synchronizeFields(checkOutSelect, checkInSelect, FormFieldsParams.TIME_OPTIONS, FormFieldsParams.TIME_OPTIONS, syncValues);
     });
 
     roomsSelect.addEventListener('change', function () {
-      window.synchronizeFields(roomsSelect, guestsSelect, ['1', '2', '3', '100'], ['1', '2', '3', '0'], syncValues);
+      window.synchronizeFields(roomsSelect, guestsSelect, FormFieldsParams.ROOMS_OPTIONS, FormFieldsParams.GUESTS_OPTIONS, syncValues);
       disableGuestsOptions(guestsSelect.value);
     });
 
     typeSelect.addEventListener('change', function () {
-      window.synchronizeFields(typeSelect, priceInput, ['bungalo', 'flat', 'house', 'palace'], [0, 1000, 5000, 10000], syncValueWithMin);
+      window.synchronizeFields(typeSelect, priceInput, FormFieldsParams.APARTMENTS_OPTIONS, FormFieldsParams.PRICE_OPTIONS, syncValueWithMin);
     });
 
     form.addEventListener('invalid', function (evt) {
