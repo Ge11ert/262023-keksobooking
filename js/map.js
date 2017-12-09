@@ -72,8 +72,8 @@
   var MapConstraints = {
     TOP: AdvertParams.LOCATION_BORDERS.Y_MIN - pinOffsetY,
     BOTTOM: AdvertParams.LOCATION_BORDERS.Y_MAX - pinOffsetY,
-    LEFT: MainPinParams.WIDTH / 2,
-    RIGHT: map.clientWidth - MainPinParams.WIDTH / 2
+    LEFT: 0,
+    RIGHT: map.clientWidth
   };
 
   // -------------------------------------------------------------------
