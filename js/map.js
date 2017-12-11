@@ -21,6 +21,8 @@
     ARROW_HEIGHT: 22
   };
 
+  var MAX_ADVERTS_AMOUNT = 5;
+
   var pinOffsetY = MainPinParams.HEIGHT / 2 + MainPinParams.ARROW_HEIGHT;
 
   var map = document.querySelector('.map');
@@ -41,9 +43,6 @@
     LEFT: 0,
     RIGHT: map.clientWidth
   };
-
-  // -------------------------------------------------------------------
-  // ------------------- Functions of MODEL component ------------------
 
   var successLoadHandler = function (loadedData) {
     adverts = createAdvertsArray(loadedData);
@@ -67,7 +66,7 @@
 
       advertsArray.push(data[i]);
     }
-    return window.utils.getRandomArrayCopy(5, advertsArray, true);
+    return window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, advertsArray, true);
   };
 
   /**
