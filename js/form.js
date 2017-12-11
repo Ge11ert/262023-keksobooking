@@ -70,6 +70,18 @@
     setAddress(initialAddress.x, initialAddress.y);
   };
 
+  var successSubmitHandler = function () {
+    var successPopup = window.createSuccessPopup();
+    document.querySelector('body').appendChild(successPopup);
+    form.reset();
+    initializeForm();
+  };
+
+  var failedSubmitHandler = function (errorMessage) {
+    var warning = window.createWarningPopup('К сожалению, форма не была отправлена. ' + errorMessage);
+    document.querySelector('body').appendChild(warning);
+  };
+
   /**
    * Subscribes fields of the form to events
    */
@@ -95,6 +107,11 @@
       ValidationTargets[evt.target.id](evt.target);
       evt.target.style.borderColor = 'red';
     }, true);
+
+    form.addEventListener('submit', function (event) {
+      window.backend.save(new FormData(form), successSubmitHandler, failedSubmitHandler);
+      event.preventDefault();
+    });
   };
 
   /**

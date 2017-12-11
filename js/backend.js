@@ -1,30 +1,56 @@
 'use strict';
 
 (function () {
-  var load = function (onLoad, onError) {
-    var URL = 'https://1510.dump.academy/keksobooking/data';
+  var BASE_URL = 'https://1510.dump.academy/keksobooking';
 
+  var ErrorCodes = {
+    401: 'Необходима авторизация',
+    403: 'Доступ запрещен',
+    404: 'Запрашиваемые данные не найдены',
+    500: 'Внутренняя ошибка сервера'
+  };
+
+  var createRequest = function (onLoad, onError) {
     var xhr = new XMLHttpRequest();
 
     xhr.responseType = 'json';
     xhr.timeout = 5000;
 
     xhr.addEventListener('load', function () {
-      onLoad(xhr.response);
+      if (xhr.status === 200) {
+        onLoad(xhr.response);
+      } else {
+        onError(ErrorCodes[xhr.status]);
+      }
     });
+
     xhr.addEventListener('error', function () {
-      onError('Ошибка получения данных');
+      onError('Произошла ошибка соединения');
     });
+
     xhr.addEventListener('timeout', function () {
       onError('Превышено время ожидания сервера');
     });
 
+    return xhr;
+  };
 
-    xhr.open('GET', URL);
+  var load = function (onLoad, onError) {
+    var xhr = createRequest(onLoad, onError);
+
+    xhr.open('GET', BASE_URL + '/data');
     xhr.send();
   };
 
+  var save = function (data, onLoad, onError) {
+    var xhr = createRequest(onLoad, onError);
+
+    xhr.open('POST', BASE_URL);
+    xhr.send(data);
+  };
+
   window.backend = {
-    load: load
+    load: load,
+    save: save
   };
 })();

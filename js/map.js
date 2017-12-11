@@ -52,7 +52,8 @@
   };
 
   var loadErrorHandler = function (errorMessage) {
-    console.log(errorMessage);
+    var warning = window.createWarningPopup('Не удалось загрузить объявления. ' + errorMessage);
+    document.querySelector('body').appendChild(warning);
   };
 
   /**
@@ -107,7 +108,9 @@
    * Enables fields of the form and removes fading overlay from the map
    */
   var enableMap = function () {
-    mapPins.appendChild(mapPinsFragment);
+    if (mapPinsFragment) {
+      mapPins.appendChild(mapPinsFragment);
+    }
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');
     setDisableProperty(noticeFieldsets, false);
