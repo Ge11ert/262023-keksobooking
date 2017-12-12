@@ -27,7 +27,7 @@
     Y_MAX: 500
   };
 
-  var MAX_ADVERTS_AMOUNT = 3;
+  var MAX_ADVERTS_AMOUNT = 5;
 
   var pinOffsetY = MainPinParams.HEIGHT / 2 + MainPinParams.ARROW_HEIGHT;
 
@@ -113,6 +113,18 @@
     return fragment;
   };
 
+  /**
+   * Returns position of the main pin, relative to the map
+   * This position indicates 'address' point, so that pin vertical size is considered
+   * @return {{x: number, y: number}}
+   */
+  var getMainPinPosition = function () {
+    return {
+      x: mainPin.offsetLeft,
+      y: mainPin.offsetTop + pinOffsetY
+    };
+  };
+
   var insertExternalNode = function (node) {
     map.insertBefore(node, filtersContainer);
   };
@@ -121,14 +133,12 @@
    * Enables fields of the form and removes fading overlay from the map
    */
   var enableMap = function () {
-    var initialX = mainPin.offsetLeft;
-    var initialY = mainPin.offsetTop;
-
+    var initAddress = getMainPinPosition();
     if (mapPinsFragment) {
       mapPins.appendChild(mapPinsFragment);
     }
 
-    window.setAddress(initialX, initialY + pinOffsetY);
+    window.setAddress(initAddress.x, initAddress.y);
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');
     setDisableProperty(noticeFieldsets, false);
@@ -197,7 +207,7 @@
       mainPin.style.top = (currentCoords.y) + 'px';
       mainPin.style.left = (currentCoords.x) + 'px';
 
-      window.setAddress(currentCoords.x, currentCoords.y + pinOffsetY);
+      window.setAddress();
     };
 
     var pinMouseUpHandler = function () {
@@ -224,5 +234,8 @@
   window.backend.load(successHandler, errorHandler);
   setDisableProperty(noticeFieldsets, true);
 
-  window.insertExternalNode = insertExternalNode;
+  window.map = {
+    insertExternalNode: insertExternalNode,
+    getMainPinPosition: getMainPinPosition
+  };
 })();

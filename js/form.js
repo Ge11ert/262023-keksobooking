@@ -26,11 +26,10 @@
 
   /**
    * Fills in the address input with position of the main pin
-   * @param {number} x
-   * @param {number} y
    */
-  var setAddress = function (x, y) {
-    addressInput.value = x + ' ' + y;
+  var setAddress = function () {
+    var currentAddress = window.map.getMainPinPosition();
+    addressInput.value = currentAddress.x + ' ' + currentAddress.y;
   };
 
   /**
@@ -63,6 +62,7 @@
     window.synchronizeFields(checkInSelect, checkOutSelect, FormFieldsParams.TIME_OPTIONS, FormFieldsParams.TIME_OPTIONS, syncValues);
     window.synchronizeFields(typeSelect, priceInput, FormFieldsParams.APARTMENTS_OPTIONS, FormFieldsParams.PRICE_OPTIONS, syncValueWithMin);
     disableGuestsOptions(guestsSelect.value);
+    setAddress();
   };
 
   /**
@@ -71,11 +71,9 @@
    */
   var successHandler = function () {
     var successPopup = window.popup.success();
-    var prevAddress = addressInput.value;
     document.querySelector('body').appendChild(successPopup);
     form.reset();
     initializeForm();
-    addressInput.value = prevAddress;
   };
 
   /**
