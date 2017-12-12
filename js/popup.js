@@ -8,6 +8,7 @@
   var successColor = '#8bc34a';
 
   var popup = document.createElement('div');
+  popup.className = 'info-popup';
   popup.style.position = 'fixed';
   popup.style.left = '50%';
   popup.style.transform = 'translate(-50%, -50%)';
@@ -35,13 +36,14 @@
 
   closeButton.addEventListener('click', function () {
     popup.parentNode.removeChild(popup);
+    popup = null;
   });
 
   popup.appendChild(popupTitle);
   popup.appendChild(popupText);
   popup.appendChild(closeButton);
 
-  window.createWarningPopup = function (errorText) {
+  var createWarningPopup = function (errorText) {
     popup.style.top = '90px';
     popup.style.borderColor = errorColor;
     popupTitle.style.color = errorColor;
@@ -49,13 +51,15 @@
     popupText.textContent = errorText;
 
     setTimeout(function () {
-      popup.parentNode.removeChild(popup);
+      if (popup) {
+        popup.parentNode.removeChild(popup);
+      }
     }, popupFadeoutTIme);
 
     return popup;
   };
 
-  window.createSuccessPopup = function () {
+  var createSuccessPopup = function () {
     popup.style.top = '50%';
     popup.style.borderColor = successColor;
     popupTitle.style.color = successColor;
@@ -63,10 +67,17 @@
     popupText.textContent = 'Ваши данные успешно отправлены';
 
     setTimeout(function () {
-      popup.parentNode.removeChild(popup);
+      if (popup) {
+        popup.parentNode.removeChild(popup);
+      }
     }, popupFadeoutTIme);
 
     return popup;
+  };
+
+  window.popup = {
+    warning: createWarningPopup,
+    success: createSuccessPopup
   };
 
 })();

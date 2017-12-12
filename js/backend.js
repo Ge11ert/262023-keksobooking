@@ -3,13 +3,23 @@
 (function () {
   var BASE_URL = 'https://1510.dump.academy/keksobooking';
 
+  /**
+   * @enum {string} ErrorCodes
+   */
   var ErrorCodes = {
+    400: 'Неверный запрос',
     401: 'Необходима авторизация',
     403: 'Доступ запрещен',
     404: 'Запрашиваемые данные не найдены',
     500: 'Внутренняя ошибка сервера'
   };
 
+  /**
+   * Creates a new XHR with predefined settings
+   * @param {Function} onLoad - Callback function, invokes in case of no errors
+   * @param {Function} onError - Callback function, invokes in case of some errors presence
+   * @return {XMLHttpRequest}
+   */
   var createRequest = function (onLoad, onError) {
     var xhr = new XMLHttpRequest();
 
@@ -35,6 +45,11 @@
     return xhr;
   };
 
+  /**
+   * Manages downloading some data from the server
+   * @param {Function} onLoad
+   * @param {Function} onError
+   */
   var load = function (onLoad, onError) {
     var xhr = createRequest(onLoad, onError);
 
@@ -42,6 +57,12 @@
     xhr.send();
   };
 
+  /**
+   * Sends provided data to the server
+   * @param {*} data
+   * @param {Function} onLoad
+   * @param {Function} onError
+   */
   var save = function (data, onLoad, onError) {
     var xhr = createRequest(onLoad, onError);
 

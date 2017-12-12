@@ -1,11 +1,6 @@
 'use strict';
 
 (function () {
-  var initialAddress = {
-    x: 600,
-    y: 429
-  };
-
   /**
    * @enum {Array} FormFieldsParams
    * */
@@ -25,6 +20,7 @@
   var guestsSelect = form.querySelector('#capacity');
 
   var typeSelect = form.querySelector('#type');
+  var titleInput = form.querySelector('#title');
   var priceInput = form.querySelector('#price');
   var addressInput = form.querySelector('#address');
 
@@ -67,18 +63,27 @@
     window.synchronizeFields(checkInSelect, checkOutSelect, FormFieldsParams.TIME_OPTIONS, FormFieldsParams.TIME_OPTIONS, syncValues);
     window.synchronizeFields(typeSelect, priceInput, FormFieldsParams.APARTMENTS_OPTIONS, FormFieldsParams.PRICE_OPTIONS, syncValueWithMin);
     disableGuestsOptions(guestsSelect.value);
-    setAddress(initialAddress.x, initialAddress.y);
   };
 
-  var successSubmitHandler = function () {
-    var successPopup = window.createSuccessPopup();
+  /**
+   * If data sending is successful, shows message about that
+   * and resets the form
+   */
+  var successHandler = function () {
+    var successPopup = window.popup.success();
+    var prevAddress = addressInput.value;
     document.querySelector('body').appendChild(successPopup);
     form.reset();
     initializeForm();
+    addressInput.value = prevAddress;
   };
 
-  var failedSubmitHandler = function (errorMessage) {
-    var warning = window.createWarningPopup('К сожалению, форма не была отправлена. ' + errorMessage);
+  /**
+   * If there are errors during data sending, shows a warning popup
+   * @param {string} errorMessage
+   */
+  var errorHandler = function (errorMessage) {
+    var warning = window.popup.warning('К сожалению, форма не была отправлена. ' + errorMessage);
     document.querySelector('body').appendChild(warning);
   };
 
@@ -103,13 +108,22 @@
       window.synchronizeFields(typeSelect, priceInput, FormFieldsParams.APARTMENTS_OPTIONS, FormFieldsParams.PRICE_OPTIONS, syncValueWithMin);
     });
 
+    titleInput.addEventListener('change', function (evt) {
+      handleTitleInvalidity(evt.target);
+    });
+
+    priceInput.addEventListener('change', function (evt) {
+      handlePriceInvalidity(evt.target);
+    });
+
     form.addEventListener('invalid', function (evt) {
-      ValidationTargets[evt.target.id](evt.target);
       evt.target.style.borderColor = 'red';
+      evt.target.focus();
+      ValidationTargets[evt.target.id](evt.target);
     }, true);
 
     form.addEventListener('submit', function (event) {
-      window.backend.save(new FormData(form), successSubmitHandler, failedSubmitHandler);
+      window.backend.save(new FormData(form), successHandler, errorHandler);
       event.preventDefault();
     });
   };
@@ -128,6 +142,7 @@
       title.setCustomValidity('Пожалуйста, добавьте заголовок');
     } else {
       title.setCustomValidity('');
+      title.style.borderColor = '#d9d9d3';
     }
   };
 
@@ -147,6 +162,7 @@
       price.setCustomValidity('Пожалуйста, введите цену');
     } else {
       price.setCustomValidity('');
+      price.style.borderColor = '#d9d9d3';
     }
   };
 

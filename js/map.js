@@ -21,7 +21,13 @@
     ARROW_HEIGHT: 22
   };
 
-  var MAX_ADVERTS_AMOUNT = 5;
+  /** @enum {number} LocationBorders */
+  var LocationBorders = {
+    Y_MIN: 100,
+    Y_MAX: 500
+  };
+
+  var MAX_ADVERTS_AMOUNT = 3;
 
   var pinOffsetY = MainPinParams.HEIGHT / 2 + MainPinParams.ARROW_HEIGHT;
 
@@ -32,31 +38,39 @@
 
   var noticeForm = document.querySelector('.notice__form');
   var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
-  var adverts = null;
-  var mapPinsArray = null;
   var mapPinsFragment = null;
 
   /** @enum {number} MapConstraints */
   var MapConstraints = {
-    TOP: 100 - pinOffsetY,
-    BOTTOM: 500 - pinOffsetY,
+    TOP: LocationBorders.Y_MIN - pinOffsetY,
+    BOTTOM: LocationBorders.Y_MAX - pinOffsetY,
     LEFT: 0,
     RIGHT: map.clientWidth
   };
 
-  var successLoadHandler = function (loadedData) {
-    adverts = createAdvertsArray(loadedData);
-    mapPinsArray = createPinsFromData(adverts);
+  /**
+   * In case of successful downloading from a server, invokes a chain of functions
+   * to render loaded adverts in the map
+   * @param {Object.<Advert>} loadedData
+   */
+  var successHandler = function (loadedData) {
+    var adverts = createAdvertsArray(loadedData);
+    var mapPinsArray = createPinsFromData(adverts);
     mapPinsFragment = renderAllPins(mapPinsArray);
   };
 
-  var loadErrorHandler = function (errorMessage) {
-    var warning = window.createWarningPopup('Не удалось загрузить объявления. ' + errorMessage);
+  /**
+   * In case of failed downloading from a sever, shows warning message
+   * with error details
+   * @param {string} errorMessage
+   */
+  var errorHandler = function (errorMessage) {
+    var warning = window.popup.warning('Не удалось загрузить объявления. ' + errorMessage);
     document.querySelector('body').appendChild(warning);
   };
 
   /**
-   * Fills up an array with generated adverts
+   * Fills up an array with loaded adverts
    * @param {Object} data
    * @return {Array.<Advert>}
    */
@@ -107,9 +121,14 @@
    * Enables fields of the form and removes fading overlay from the map
    */
   var enableMap = function () {
+    var initialX = mainPin.offsetLeft;
+    var initialY = mainPin.offsetTop;
+
     if (mapPinsFragment) {
       mapPins.appendChild(mapPinsFragment);
     }
+
+    window.setAddress(initialX, initialY + pinOffsetY);
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');
     setDisableProperty(noticeFieldsets, false);
@@ -126,6 +145,9 @@
     });
   };
 
+  /**
+   * Enables the ability to drag the main pin
+   */
   mainPin.addEventListener('mousedown', function (evt) {
     var startCoords = {
       x: evt.clientX,
@@ -199,7 +221,7 @@
     }
   });
 
-  window.backend.load(successLoadHandler, loadErrorHandler);
+  window.backend.load(successHandler, errorHandler);
   setDisableProperty(noticeFieldsets, true);
 
   window.insertExternalNode = insertExternalNode;
