@@ -98,7 +98,7 @@
     });
 
     document.addEventListener('keydown', cardKeydownHandler);
-    window.insertExternalNode(advCard);
+    window.map.insertExternalNode(advCard);
   };
 
   /**

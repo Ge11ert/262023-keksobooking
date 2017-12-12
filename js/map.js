@@ -8,43 +8,6 @@
    * @property {Object} location
    */
 
-  /**
-   * @enum {Array.<string>|Object|number} AdvertParams
-   */
-  var AdvertParams = {
-    TITLES: [
-      'Большая уютная квартира', 'Маленькая неуютная квартира', 'Огромный прекрасный дворец',
-      'Маленький ужасный дворец', 'Красивый гостевой домик', 'Некрасивый негостеприимный домик',
-      'Уютное бунгало далеко от моря', 'Неуютное бунгало по колено в воде'],
-
-    TYPES: ['flat', 'house', 'bungalo'],
-
-    CHECKINOUT_TIMES: ['12:00', '13:00', '14:00'],
-
-    FEATURES_LIST: ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'],
-
-    LOCATION_BORDERS: {
-      X_MIN: 300,
-      Y_MIN: 100,
-      X_MAX: 900,
-      Y_MAX: 500
-    },
-
-    ROOMS_AMOUNT: {
-      MIN: 1,
-      MAX: 5
-    },
-
-    PRICES: {
-      MIN: 1000,
-      MAX: 1000000
-    },
-
-    ADVERTS_AMOUNT: 8,
-
-    MAX_GUESTS: 7
-  };
-
   /** @enum {number} KeyCodes */
   var KeyCodes = {
     ENTER: 13,
@@ -58,6 +21,14 @@
     ARROW_HEIGHT: 22
   };
 
+  /** @enum {number} LocationBorders */
+  var LocationBorders = {
+    Y_MIN: 100,
+    Y_MAX: 500
+  };
+
+  var MAX_ADVERTS_AMOUNT = 5;
+
   var pinOffsetY = MainPinParams.HEIGHT / 2 + MainPinParams.ARROW_HEIGHT;
 
   var map = document.querySelector('.map');
@@ -67,135 +38,49 @@
 
   var noticeForm = document.querySelector('.notice__form');
   var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
+  var mapPinsFragment = null;
 
   /** @enum {number} MapConstraints */
   var MapConstraints = {
-    TOP: AdvertParams.LOCATION_BORDERS.Y_MIN - pinOffsetY,
-    BOTTOM: AdvertParams.LOCATION_BORDERS.Y_MAX - pinOffsetY,
+    TOP: LocationBorders.Y_MIN - pinOffsetY,
+    BOTTOM: LocationBorders.Y_MAX - pinOffsetY,
     LEFT: 0,
     RIGHT: map.clientWidth
   };
 
-  // -------------------------------------------------------------------
-  // ------------------- Functions of MODEL component ------------------
+  /**
+   * In case of successful downloading from a server, invokes a chain of functions
+   * to render loaded adverts in the map
+   * @param {Object.<Advert>} loadedData
+   */
+  var successHandler = function (loadedData) {
+    var adverts = createAdvertsArray(loadedData);
+    var mapPinsArray = createPinsFromData(adverts);
+    mapPinsFragment = renderAllPins(mapPinsArray);
+  };
 
   /**
-   * Fills up an array with generated adverts
+   * In case of failed downloading from a sever, shows warning message
+   * with error details
+   * @param {string} errorMessage
+   */
+  var errorHandler = function (errorMessage) {
+    var warning = window.popup.warning('Не удалось загрузить объявления. ' + errorMessage);
+    document.querySelector('body').appendChild(warning);
+  };
+
+  /**
+   * Fills up an array with loaded adverts
+   * @param {Object} data
    * @return {Array.<Advert>}
    */
-  var createAdvertsArray = function () {
+  var createAdvertsArray = function (data) {
     var advertsArray = [];
-    for (var i = 0; i < AdvertParams.ADVERTS_AMOUNT; i++) {
-      advertsArray.push(generateAdvert(i));
+    for (var i = 0; i < data.length; i++) {
+
+      advertsArray.push(data[i]);
     }
-
-    return advertsArray;
-  };
-
-  /**
-   * Creates an object of type Advert
-   * @param {number} advertIndex
-   * @return {Advert}
-   */
-  var generateAdvert = function (advertIndex) {
-    var locX = Math.floor(window.utils.getRandomFromRange(AdvertParams.LOCATION_BORDERS.X_MIN, AdvertParams.LOCATION_BORDERS.X_MAX));
-    var locY = Math.floor(window.utils.getRandomFromRange(AdvertParams.LOCATION_BORDERS.Y_MIN, AdvertParams.LOCATION_BORDERS.Y_MAX));
-    var title = getOfferTitle(advertIndex);
-    var houseType = getHouseType(title);
-
-    return {
-      author: {
-        avatar: getUserAvatar(advertIndex)
-      },
-
-      offer: {
-        title: title,
-        address: locX + ' ' + locY,
-        price: Math.floor(window.utils.getRandomFromRange(AdvertParams.PRICES.MIN, AdvertParams.PRICES.MAX)),
-        type: houseType,
-        rooms: getRoomsQuantity(),
-        guests: Math.floor(window.utils.getRandomFromRange(1, AdvertParams.MAX_GUESTS)),
-        checkin: getCheckInOutTime(AdvertParams.CHECKINOUT_TIMES),
-        checkout: getCheckInOutTime(AdvertParams.CHECKINOUT_TIMES),
-        features: getFeaturesList(),
-        description: '',
-        photos: []
-      },
-
-      location: {
-        x: locX,
-        y: locY
-      }
-    };
-  };
-
-  /**
-   * Generates relative path to a user image
-   * @param {number} userIndex
-   * @return {string} - Path to user image
-   */
-  var getUserAvatar = function (userIndex) {
-    var pathBase = 'img/avatars/user';
-    userIndex++;
-    pathBase = (userIndex < 10) ? pathBase + '0' : pathBase;
-
-    return pathBase + userIndex + '.png';
-  };
-
-  /**
-   * Takes a title for an advert
-   * @param {number} index - Current advert index
-   * @return {string} - A title for a new advert
-   */
-  var getOfferTitle = function (index) {
-    return AdvertParams.TITLES[index];
-  };
-
-  /**
-   * Returns a title of an advert according to its house type
-   * @param {string} advertTitle
-   * @return {string}
-   */
-  var getHouseType = function (advertTitle) {
-    var typeIndex = 0;
-    if (/квартира/.test(advertTitle.toLowerCase())) {
-      typeIndex = 0;
-    } else if (/дворец/.test(advertTitle.toLowerCase())) {
-      typeIndex = 1;
-    } else {
-      typeIndex = 2;
-    }
-
-    return AdvertParams.TYPES[typeIndex];
-  };
-
-  /**
-   * Returns a random number of rooms for each advert
-   * @return {number}
-   */
-  var getRoomsQuantity = function () {
-    return Math.floor(window.utils.getRandomFromRange(AdvertParams.ROOMS_AMOUNT.MIN, AdvertParams.ROOMS_AMOUNT.MAX));
-  };
-
-  /**
-   * Selects one of the time options from array for 'check in' time or 'check out' time
-   * @param {Array.<string>} checkTimeArray
-   * @return {string}
-   */
-  var getCheckInOutTime = function (checkTimeArray) {
-    var timeIndex = window.utils.getRandomFromRange(0, checkTimeArray.length - 1).toFixed();
-
-    return checkTimeArray[timeIndex];
-  };
-
-  /**
-   * Generates a random set of advert features.
-   * @return {Array} - Array of random chosen features
-   */
-  var getFeaturesList = function () {
-    var featuresArrayLength = Math.floor(window.utils.getRandomFromRange(1, AdvertParams.FEATURES_LIST.length));
-
-    return window.utils.getRandomArrayCopy(featuresArrayLength, AdvertParams.FEATURES_LIST, true);
+    return window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, advertsArray, true);
   };
 
   /**
@@ -228,6 +113,18 @@
     return fragment;
   };
 
+  /**
+   * Returns position of the main pin, relative to the map
+   * This position indicates 'address' point, so that pin vertical size is considered
+   * @return {{x: number, y: number}}
+   */
+  var getMainPinPosition = function () {
+    return {
+      x: mainPin.offsetLeft,
+      y: mainPin.offsetTop + pinOffsetY
+    };
+  };
+
   var insertExternalNode = function (node) {
     map.insertBefore(node, filtersContainer);
   };
@@ -236,7 +133,12 @@
    * Enables fields of the form and removes fading overlay from the map
    */
   var enableMap = function () {
-    mapPins.appendChild(mapPinsFragment);
+    var initAddress = getMainPinPosition();
+    if (mapPinsFragment) {
+      mapPins.appendChild(mapPinsFragment);
+    }
+
+    window.setAddress(initAddress.x, initAddress.y);
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');
     setDisableProperty(noticeFieldsets, false);
@@ -253,12 +155,9 @@
     });
   };
 
-  var adverts = createAdvertsArray();
-  var mapPinsArray = createPinsFromData(adverts);
-  var mapPinsFragment = renderAllPins(mapPinsArray);
-
-  setDisableProperty(noticeFieldsets, true);
-
+  /**
+   * Enables the ability to drag the main pin
+   */
   mainPin.addEventListener('mousedown', function (evt) {
     var startCoords = {
       x: evt.clientX,
@@ -308,7 +207,7 @@
       mainPin.style.top = (currentCoords.y) + 'px';
       mainPin.style.left = (currentCoords.x) + 'px';
 
-      window.setAddress(currentCoords.x, currentCoords.y + pinOffsetY);
+      window.setAddress();
     };
 
     var pinMouseUpHandler = function () {
@@ -322,7 +221,6 @@
     };
 
     mainPin.classList.add('map__pin--active');
-    // mainPin.style.cursor = 'none';
     document.addEventListener('mousemove', pinMouseMoveHandler);
     document.addEventListener('mouseup', pinMouseUpHandler);
   });
@@ -333,5 +231,11 @@
     }
   });
 
-  window.insertExternalNode = insertExternalNode;
+  window.backend.load(successHandler, errorHandler);
+  setDisableProperty(noticeFieldsets, true);
+
+  window.map = {
+    insertExternalNode: insertExternalNode,
+    getMainPinPosition: getMainPinPosition
+  };
 })();
