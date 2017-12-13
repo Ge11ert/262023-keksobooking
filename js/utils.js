@@ -25,7 +25,7 @@
     var newItem;
 
     if (arrLen > baseArray.length) {
-      arrLen = baseArray.length;
+      return baseArray;
     }
 
     while (newArray.length < arrLen) {

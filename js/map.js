@@ -27,6 +27,11 @@
     Y_MAX: 500
   };
 
+  var PriceBreakpoints = {
+    LOW: 10000,
+    MIDDLE: 50000
+  };
+
   var MAX_ADVERTS_AMOUNT = 5;
 
   var pinOffsetY = MainPinParams.HEIGHT / 2 + MainPinParams.ARROW_HEIGHT;
@@ -34,10 +39,13 @@
   var map = document.querySelector('.map');
   var mapPins = map.querySelector('.map__pins');
   var mainPin = map.querySelector('.map__pin--main');
-  var filtersContainer = document.querySelector('map__filters-container');
+
+  var filtersContainer = document.querySelector('.map__filters-container');
+  var filters = filtersContainer.querySelectorAll('.map__filter');
 
   var noticeForm = document.querySelector('.notice__form');
   var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
+  var adverts = null;
   var mapPinsFragment = null;
 
   /** @enum {number} MapConstraints */
@@ -54,8 +62,8 @@
    * @param {Object.<Advert>} loadedData
    */
   var successHandler = function (loadedData) {
-    var adverts = createAdvertsArray(loadedData);
-    var mapPinsArray = createPinsFromData(adverts);
+    adverts = createAdvertsArray(loadedData);
+    var mapPinsArray = createPinsFromData(window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, adverts, true));
     mapPinsFragment = renderAllPins(mapPinsArray);
   };
 
@@ -80,7 +88,7 @@
 
       advertsArray.push(data[i]);
     }
-    return window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, advertsArray, true);
+    return advertsArray;
   };
 
   /**
@@ -142,6 +150,49 @@
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');
     setDisableProperty(noticeFieldsets, false);
+  };
+
+  /**
+   * Filters initial array of adverts by defined condition,
+   * clears the map and renders appropriate pin collection
+   * @param {string} filterValue
+   * @param {string} filterType
+   */
+  var updateMap = function (filterValue, filterType) {
+    /**
+     * @param {Advert} advert
+     * @return {boolean}
+     */
+    var filterByPrice = function (advert) {
+      switch (filterValue) {
+        case 'low':
+          return advert.offer.price < PriceBreakpoints.LOW;
+        case 'middle':
+          return (advert.offer.price >= PriceBreakpoints.LOW && advert.offer.price < PriceBreakpoints.MIDDLE);
+        case 'high':
+          return advert.offer.price >= PriceBreakpoints.MIDDLE;
+        default:
+          return true;
+      }
+    };
+
+    /**
+     * @param {Advert} advert
+     * @return {boolean}
+     */
+    var filterByValue = function (advert) {
+      return filterValue === 'any' ? true : advert.offer[filterType].toString() === filterValue;
+    };
+
+    var filteredAdverts = (filterType === 'price') ? adverts.filter(filterByPrice) : adverts.filter(filterByValue);
+    var mapPinsArray = createPinsFromData(filteredAdverts); // window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, filteredAdverts, true)
+
+    window.utils.clearDOMNode(mapPins);
+    mapPins.appendChild(mainPin);
+    if (map.querySelector('.popup')) {
+      map.querySelector('.popup__close').dispatchEvent(new Event('click'));
+    }
+    mapPins.appendChild(renderAllPins(mapPinsArray));
   };
 
   /**
@@ -229,6 +280,13 @@
     if (evt.keyCode === KeyCodes.ENTER) {
       enableMap();
     }
+  });
+
+  filters.forEach(function (filter) {
+    filter.addEventListener('change', function (evt) {
+      var type = evt.target.id.slice(8);
+      updateMap(evt.target.value, type);
+    });
   });
 
   window.backend.load(successHandler, errorHandler);
