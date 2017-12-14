@@ -42,10 +42,12 @@
 
   var filtersContainer = document.querySelector('.map__filters-container');
   var filters = filtersContainer.querySelectorAll('.map__filter');
+  var featuresFilter = filtersContainer.querySelector('.map__filter-set');
 
   var noticeForm = document.querySelector('.notice__form');
   var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
   var adverts = null;
+  var filteredAdverts = {};
   var mapPinsFragment = null;
 
   /** @enum {number} MapConstraints */
@@ -152,14 +154,11 @@
     setDisableProperty(noticeFieldsets, false);
   };
 
-  var filtered = {};
-
   var applyComplexFilter = function (advObject) {
     var resultArray = [];
     var appliedFilters = Object.keys(advObject);
-    var firstFilter = appliedFilters[0];
     var flag = false;
-    advObject[firstFilter].forEach(function (item) {
+    advObject[appliedFilters[0]].forEach(function (item) {
       for (var i = 1; i < appliedFilters.length; i++) {
         flag = advObject[appliedFilters[i]].indexOf(item) > -1;
         if (!flag) {
@@ -202,12 +201,17 @@
      * @return {boolean}
      */
     var filterByValue = function (advert) {
-      return filterValue === 'any' ? true : advert.offer[filterType].toString() === filterValue;
+      return filterValue === 'any' ? true : advert.offer[filterType].toString().search(filterValue) !== -1;
     };
 
-    filtered[filterType] = (filterType === 'price') ? adverts.filter(filterByPrice) : adverts.filter(filterByValue);
-    var complexFilter = (Object.keys(filtered).length > 1) ? applyComplexFilter(filtered) : filtered[filterType];
-    var mapPinsArray = createPinsFromData(complexFilter); // window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, filteredAdverts, true)
+    if (filterType === 'features') {
+      filteredAdverts[filterValue] = adverts.filter(filterByValue);
+    } else {
+      filteredAdverts[filterType] = (filterType === 'price') ? adverts.filter(filterByPrice) : adverts.filter(filterByValue);
+    }
+
+    var complexFilter = (Object.keys(filteredAdverts).length > 1) ? applyComplexFilter(filteredAdverts) : (filteredAdverts[filterType] || filteredAdverts[filterValue]);
+    var mapPinsArray = createPinsFromData(complexFilter);
 
     window.utils.clearDOMNode(mapPins);
     mapPins.appendChild(mainPin);
@@ -309,6 +313,11 @@
       var type = evt.target.id.slice(8);
       updateMap(evt.target.value, type);
     });
+  });
+
+  featuresFilter.addEventListener('change', function (evt) {
+    var value = evt.target.checked ? evt.target.value : 'any';
+    updateMap(value, 'features');
   });
 
   window.backend.load(successHandler, errorHandler);
