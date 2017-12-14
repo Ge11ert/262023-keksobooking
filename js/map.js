@@ -154,10 +154,17 @@
     setDisableProperty(noticeFieldsets, false);
   };
 
+  /**
+   * Gets an object with props, that contain arrays of filtered adverts of each filter type.
+   * The result of applying multiple filters is an intersection of these arrays.
+   * @param {Object.<Array>} advObject
+   * @return {Array}
+   */
   var applyComplexFilter = function (advObject) {
     var resultArray = [];
     var appliedFilters = Object.keys(advObject);
     var flag = false;
+
     advObject[appliedFilters[0]].forEach(function (item) {
       for (var i = 1; i < appliedFilters.length; i++) {
         flag = advObject[appliedFilters[i]].indexOf(item) > -1;
@@ -169,6 +176,7 @@
         resultArray.push(item);
       }
     });
+
     return resultArray;
   };
 
