@@ -152,6 +152,27 @@
     setDisableProperty(noticeFieldsets, false);
   };
 
+  var filtered = {};
+
+  var applyComplexFilter = function (advObject) {
+    var resultArray = [];
+    var appliedFilters = Object.keys(advObject);
+    var firstFilter = appliedFilters[0];
+    var flag = false;
+    advObject[firstFilter].forEach(function (item) {
+      for (var i = 1; i < appliedFilters.length; i++) {
+        flag = advObject[appliedFilters[i]].indexOf(item) > -1;
+        if (!flag) {
+          break;
+        }
+      }
+      if (flag) {
+        resultArray.push(item);
+      }
+    });
+    return resultArray;
+  };
+
   /**
    * Filters initial array of adverts by defined condition,
    * clears the map and renders appropriate pin collection
@@ -184,8 +205,9 @@
       return filterValue === 'any' ? true : advert.offer[filterType].toString() === filterValue;
     };
 
-    var filteredAdverts = (filterType === 'price') ? adverts.filter(filterByPrice) : adverts.filter(filterByValue);
-    var mapPinsArray = createPinsFromData(filteredAdverts); // window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, filteredAdverts, true)
+    filtered[filterType] = (filterType === 'price') ? adverts.filter(filterByPrice) : adverts.filter(filterByValue);
+    var complexFilter = (Object.keys(filtered).length > 1) ? applyComplexFilter(filtered) : filtered[filterType];
+    var mapPinsArray = createPinsFromData(complexFilter); // window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, filteredAdverts, true)
 
     window.utils.clearDOMNode(mapPins);
     mapPins.appendChild(mainPin);
