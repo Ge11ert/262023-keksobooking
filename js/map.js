@@ -56,8 +56,8 @@
    */
   var successHandler = function (loadedData) {
     adverts = createAdvertsArray(loadedData);
-    var mapPinsArray = createPinsFromData(window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, adverts, true));
-    mapPinsFragment = renderAllPins(mapPinsArray);
+    var mapPinsArray = createPinsArray(window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, adverts, true));
+    mapPinsFragment = renderPins(mapPinsArray);
   };
 
   /**
@@ -89,7 +89,7 @@
    * @param {Array.<Advert>} advertsArray
    * @return {Array.<Element>} - Array of DOM elements
    */
-  var createPinsFromData = function (advertsArray) {
+  var createPinsArray = function (advertsArray) {
     var pinsArray = [];
 
     advertsArray.forEach(function (item) {
@@ -104,7 +104,7 @@
    * @param {Array.<Element>} pinsArray
    * @return {DocumentFragment}
    */
-  var renderAllPins = function (pinsArray) {
+  var renderPins = function (pinsArray) {
     var fragment = document.createDocumentFragment();
 
     pinsArray.forEach(function (pin) {
@@ -152,14 +152,14 @@
    */
   var updateMap = function () {
     var filteredAdverts = window.filterAdverts(adverts);
-    var mapPinsArray = createPinsFromData(filteredAdverts);
+    var mapPinsArray = createPinsArray(filteredAdverts);
 
     window.utils.clearDOMNode(mapPins);
     mapPins.appendChild(mainPin);
     if (map.querySelector('.popup')) {
       map.querySelector('.popup__close').dispatchEvent(new Event('click'));
     }
-    mapPins.appendChild(renderAllPins(mapPinsArray));
+    mapPins.appendChild(renderPins(mapPinsArray));
   };
 
   /**
