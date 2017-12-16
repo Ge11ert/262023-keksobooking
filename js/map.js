@@ -27,11 +27,6 @@
     Y_MAX: 500
   };
 
-  var PriceBreakpoints = {
-    LOW: 10000,
-    MIDDLE: 50000
-  };
-
   var MAX_ADVERTS_AMOUNT = 5;
 
   var pinOffsetY = MainPinParams.HEIGHT / 2 + MainPinParams.ARROW_HEIGHT;
@@ -41,13 +36,9 @@
   var mainPin = map.querySelector('.map__pin--main');
 
   var filtersContainer = document.querySelector('.map__filters-container');
-  var filters = filtersContainer.querySelectorAll('.map__filter');
-  var featuresFilter = filtersContainer.querySelector('.map__filter-set');
-
   var noticeForm = document.querySelector('.notice__form');
   var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
-  var adverts = null;
-  var filteredAdverts = {};
+  var adverts = [];
   var mapPinsFragment = null;
 
   /** @enum {number} MapConstraints */
@@ -154,72 +145,14 @@
     setDisableProperty(noticeFieldsets, false);
   };
 
-  /**
-   * Gets an object with props, that contain arrays of filtered adverts of each filter type.
-   * The result of applying multiple filters is an intersection of these arrays.
-   * @param {Object.<Array>} advObject
-   * @return {Array}
-   */
-  var applyComplexFilter = function (advObject) {
-    var resultArray = [];
-    var appliedFilters = Object.keys(advObject);
-    var flag = false;
-
-    advObject[appliedFilters[0]].forEach(function (item) {
-      for (var i = 1; i < appliedFilters.length; i++) {
-        flag = advObject[appliedFilters[i]].indexOf(item) > -1;
-        if (!flag) {
-          break;
-        }
-      }
-      if (flag) {
-        resultArray.push(item);
-      }
-    });
-
-    return resultArray;
-  };
 
   /**
-   * Filters initial array of adverts by defined condition,
-   * clears the map and renders appropriate pin collection
-   * @param {string} filterValue
-   * @param {string} filterType
+   * Creates an array of filtered adverts, using 'filter.js' module.
+   * Clears the map from previously rendered pins and renders only acceptable pins
    */
-  var updateMap = function (filterValue, filterType) {
-    /**
-     * @param {Advert} advert
-     * @return {boolean}
-     */
-    var filterByPrice = function (advert) {
-      switch (filterValue) {
-        case 'low':
-          return advert.offer.price < PriceBreakpoints.LOW;
-        case 'middle':
-          return (advert.offer.price >= PriceBreakpoints.LOW && advert.offer.price < PriceBreakpoints.MIDDLE);
-        case 'high':
-          return advert.offer.price >= PriceBreakpoints.MIDDLE;
-        default:
-          return true;
-      }
-    };
-
-    /**
-     * @param {Advert} advert
-     * @return {boolean}
-     */
-    var filterByValue = function (advert) {
-      return filterValue === 'any' ? true : advert.offer[filterType].toString().search(filterValue) !== -1;
-    };
-
-    if (filterType === 'features') {
-      filteredAdverts[filterValue] = adverts.filter(filterByValue);
-    } else {
-      filteredAdverts[filterType] = (filterType === 'price') ? adverts.filter(filterByPrice) : adverts.filter(filterByValue);
-    }
-
-    var complexFilter = (Object.keys(filteredAdverts).length > 1) ? applyComplexFilter(filteredAdverts) : (filteredAdverts[filterType] || filteredAdverts[filterValue]);
-    var mapPinsArray = createPinsFromData(complexFilter);
+  var updateMap = function () {
+    var filteredAdverts = window.filterAdverts(adverts);
+    var mapPinsArray = createPinsFromData(filteredAdverts);
 
     window.utils.clearDOMNode(mapPins);
     mapPins.appendChild(mainPin);
@@ -316,16 +249,8 @@
     }
   });
 
-  filters.forEach(function (filter) {
-    filter.addEventListener('change', function (evt) {
-      var type = evt.target.id.slice(8);
-      updateMap(evt.target.value, type);
-    });
-  });
-
-  featuresFilter.addEventListener('change', function (evt) {
-    var value = evt.target.checked ? evt.target.value : 'any';
-    updateMap(value, 'features');
+  filtersContainer.addEventListener('change', function () {
+    window.utils.debounce(updateMap, 500);
   });
 
   window.backend.load(successHandler, errorHandler);

@@ -1,6 +1,8 @@
 'use strict';
 
 (function () {
+  var lastTimeout = null;
+
   /**
    * Returns a random number between min and max
    * @param {number} min
@@ -73,10 +75,23 @@
     return endingForms[2];
   };
 
+  /**
+   * Allows to execute some function with given latency after being called.
+   * @param {Function} callback - Function to be invoked
+   * @param {number} interval - Latency time in ms
+   */
+  var debounce = function (callback, interval) {
+    if (lastTimeout) {
+      window.clearTimeout(lastTimeout);
+    }
+    lastTimeout = window.setTimeout(callback, interval);
+  };
+
   window.utils = {
     getRandomFromRange: getRandomFromRange,
     getRandomArrayCopy: getRandomArrayCopy,
     clearDOMNode: clearDOMNode,
-    getWordEnding: getWordEnding
+    getWordEnding: getWordEnding,
+    debounce: debounce
   };
 })();
