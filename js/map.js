@@ -155,9 +155,7 @@
 
     window.utils.clearDOMNode(mapPins);
     mapPins.appendChild(mainPin);
-    if (map.querySelector('.popup')) {
-      map.querySelector('.popup__close').dispatchEvent(new Event('click'));
-    }
+    window.card.hide();
     mapPins.appendChild(renderPins(mapPinsArray));
   };
 

@@ -51,7 +51,7 @@
 
     evt.currentTarget.classList.add('map__pin--active');
     activePin = evt.currentTarget;
-    window.createCard(advert);
+    window.card.create(advert);
   };
 
   /**
