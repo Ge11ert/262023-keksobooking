@@ -35,7 +35,6 @@
   var mapPins = map.querySelector('.map__pins');
   var mainPin = map.querySelector('.map__pin--main');
 
-  var filtersContainer = document.querySelector('.map__filters-container');
   var noticeForm = document.querySelector('.notice__form');
   var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
   var adverts = [];
@@ -127,7 +126,7 @@
   };
 
   var insertExternalNode = function (node) {
-    map.insertBefore(node, filtersContainer);
+    map.insertBefore(node, mapPins.nextSibling);
   };
 
   /**
@@ -249,15 +248,12 @@
     }
   });
 
-  filtersContainer.addEventListener('change', function () {
-    window.utils.debounce(updateMap, 500);
-  });
-
   window.backend.load(successHandler, errorHandler);
   setDisableProperty(noticeFieldsets, true);
 
   window.map = {
     insertExternalNode: insertExternalNode,
-    getMainPinPosition: getMainPinPosition
+    getMainPinPosition: getMainPinPosition,
+    updateMap: updateMap
   };
 })();
