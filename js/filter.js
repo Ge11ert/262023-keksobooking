@@ -2,6 +2,11 @@
 
 (function () {
   /**
+   * @const {number}
+   */
+  var FILTER_SWITCH_LATENCY = 500; // 0.5s
+
+  /**
    * @enum {number} PriceBreakpoints
    */
   var PriceBreakpoints = {
@@ -67,7 +72,7 @@
   var filteredArray = [];
 
   filtersContainer.addEventListener('change', function () {
-    window.utils.debounce(window.map.updateMap, 10);
+    window.utils.debounce(window.map.updateMap, FILTER_SWITCH_LATENCY);
   });
 
   /**
