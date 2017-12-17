@@ -34,10 +34,10 @@
   var map = document.querySelector('.map');
   var mapPins = map.querySelector('.map__pins');
   var mainPin = map.querySelector('.map__pin--main');
-  var filtersContainer = document.querySelector('map__filters-container');
 
   var noticeForm = document.querySelector('.notice__form');
   var noticeFieldsets = noticeForm.querySelectorAll('.notice__form fieldset');
+  var adverts = [];
   var mapPinsFragment = null;
 
   /** @enum {number} MapConstraints */
@@ -54,9 +54,9 @@
    * @param {Object.<Advert>} loadedData
    */
   var successHandler = function (loadedData) {
-    var adverts = createAdvertsArray(loadedData);
-    var mapPinsArray = createPinsFromData(adverts);
-    mapPinsFragment = renderAllPins(mapPinsArray);
+    adverts = createAdvertsArray(loadedData);
+    var mapPinsArray = createPinsArray(window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, adverts, true));
+    mapPinsFragment = renderPins(mapPinsArray);
   };
 
   /**
@@ -80,7 +80,7 @@
 
       advertsArray.push(data[i]);
     }
-    return window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, advertsArray, true);
+    return advertsArray;
   };
 
   /**
@@ -88,7 +88,7 @@
    * @param {Array.<Advert>} advertsArray
    * @return {Array.<Element>} - Array of DOM elements
    */
-  var createPinsFromData = function (advertsArray) {
+  var createPinsArray = function (advertsArray) {
     var pinsArray = [];
 
     advertsArray.forEach(function (item) {
@@ -103,7 +103,7 @@
    * @param {Array.<Element>} pinsArray
    * @return {DocumentFragment}
    */
-  var renderAllPins = function (pinsArray) {
+  var renderPins = function (pinsArray) {
     var fragment = document.createDocumentFragment();
 
     pinsArray.forEach(function (pin) {
@@ -126,7 +126,7 @@
   };
 
   var insertExternalNode = function (node) {
-    map.insertBefore(node, filtersContainer);
+    map.insertBefore(node, mapPins.nextSibling);
   };
 
   /**
@@ -142,6 +142,21 @@
     map.classList.remove('map--faded');
     noticeForm.classList.remove('notice__form--disabled');
     setDisableProperty(noticeFieldsets, false);
+  };
+
+
+  /**
+   * Creates an array of filtered adverts, using 'filter.js' module.
+   * Clears the map from previously rendered pins and renders only acceptable pins
+   */
+  var updateMap = function () {
+    var filteredAdverts = window.filterAdverts(adverts);
+    var mapPinsArray = createPinsArray(filteredAdverts);
+
+    window.utils.clearDOMNode(mapPins);
+    mapPins.appendChild(mainPin);
+    window.card.hide();
+    mapPins.appendChild(renderPins(mapPinsArray));
   };
 
   /**
@@ -236,6 +251,7 @@
 
   window.map = {
     insertExternalNode: insertExternalNode,
-    getMainPinPosition: getMainPinPosition
+    getMainPinPosition: getMainPinPosition,
+    updateMap: updateMap
   };
 })();

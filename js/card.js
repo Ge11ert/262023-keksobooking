@@ -88,9 +88,8 @@
    * @param {Advert} advert
    */
   var createCard = function (advert) {
-    if (advCard) {
-      hideCard();
-    }
+    hideCard();
+
     advCard = fillAdvertCard(advert);
     advCard.querySelector('.popup__close').addEventListener('click', function () {
       hideCard();
@@ -102,12 +101,14 @@
   };
 
   /**
-   * Deletes a card of an advert form DOM
+   * Deletes a card of an advert from DOM-tree
    */
   var hideCard = function () {
-    advCard.parentNode.removeChild(advCard);
-    advCard = null;
-    document.removeEventListener('keydown', cardKeydownHandler);
+    if (advCard) {
+      advCard.parentNode.removeChild(advCard);
+      advCard = null;
+      document.removeEventListener('keydown', cardKeydownHandler);
+    }
   };
 
   /**
@@ -121,5 +122,9 @@
     }
   };
 
-  window.createCard = createCard;
+  // window.createCard = createCard;
+  window.card = {
+    create: createCard,
+    hide: hideCard
+  };
 })();
