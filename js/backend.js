@@ -30,7 +30,7 @@
       if (xhr.status === 200) {
         onLoad(xhr.response);
       } else {
-        onError(ErrorCodes[xhr.status]);
+        onError(ErrorCodes[xhr.status] || 'Неизвестная ошибка');
       }
     });
 

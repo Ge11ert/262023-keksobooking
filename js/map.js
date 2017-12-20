@@ -151,7 +151,7 @@
    */
   var updateMap = function () {
     var filteredAdverts = window.filterAdverts(adverts);
-    var mapPinsArray = createPinsArray(filteredAdverts);
+    var mapPinsArray = createPinsArray(window.utils.getRandomArrayCopy(MAX_ADVERTS_AMOUNT, filteredAdverts, true));
 
     window.utils.clearDOMNode(mapPins);
     mapPins.appendChild(mainPin);
