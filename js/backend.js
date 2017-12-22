@@ -7,11 +7,12 @@
    * @enum {string} ErrorCodes
    */
   var ErrorCodes = {
-    400: 'Неверный запрос',
-    401: 'Необходима авторизация',
-    403: 'Доступ запрещен',
-    404: 'Запрашиваемые данные не найдены',
-    500: 'Внутренняя ошибка сервера'
+    '400': 'Неверный запрос',
+    '401': 'Необходима авторизация',
+    '403': 'Доступ запрещен',
+    '404': 'Запрашиваемые данные не найдены',
+    '500': 'Внутренняя ошибка сервера',
+    'default': 'Неизвестная ошибка'
   };
 
   /**
@@ -24,13 +25,13 @@
     var xhr = new XMLHttpRequest();
 
     xhr.responseType = 'json';
-    xhr.timeout = 5000;
+    xhr.timeout = 10000;
 
     xhr.addEventListener('load', function () {
       if (xhr.status === 200) {
         onLoad(xhr.response);
       } else {
-        onError(ErrorCodes[xhr.status]);
+        onError(ErrorCodes[xhr.status] || ErrorCodes['default']);
       }
     });
 

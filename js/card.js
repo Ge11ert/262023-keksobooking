@@ -1,20 +1,16 @@
 'use strict';
 
 (function () {
-
-  /**
-   * @enum {string} AccommodationTypes
-   */
-  var AccommodationTypes = {
-    'flat': 'Квартира',
-    'house': 'Дом',
-    'bungalo': 'Бунгало'
-  };
-
   /** @enum {number} KeyCodes */
   var KeyCodes = {
     ENTER: 13,
     ESC: 27
+  };
+
+  var accommodationTypes = {
+    'flat': 'Квартира',
+    'house': 'Дом',
+    'bungalo': 'Бунгало'
   };
 
   var cardTemplate = document.querySelector('template').content.querySelector('article.map__card');
@@ -41,7 +37,7 @@
     cardTitle.textContent = advert.offer.title;
     cardAddress.textContent = advert.offer.address;
     cardPrice.textContent = advert.offer.price + '\t\u20BD/ночь';
-    cardType.textContent = AccommodationTypes[advert.offer.type] || '';
+    cardType.textContent = accommodationTypes[advert.offer.type] || '';
     cardRooms.textContent = getRoomsAndGuests(advert.offer.guests, advert.offer.rooms);
     cardTime.textContent = 'Заезд после ' + advert.offer.checkin + ', ' + 'выезд до ' + advert.offer.checkout;
     fillFeaturesList(advert.offer.features, cardFeatures);

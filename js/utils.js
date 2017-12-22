@@ -26,7 +26,7 @@
     var newArray = [];
     var newItem;
 
-    if (arrLen > baseArray.length) {
+    if (arrLen >= baseArray.length) {
       return baseArray;
     }
 

@@ -12,7 +12,10 @@
     PRICE_OPTIONS: [0, 1000, 5000, 10000]
   };
 
+  var BASE_BORDER_COLOR = '#d9d9d3';
+
   var form = document.querySelector('.notice__form');
+  var resetButton = form.querySelector('.form__reset');
   var checkInSelect = form.querySelector('#timein');
   var checkOutSelect = form.querySelector('#timeout');
 
@@ -23,6 +26,9 @@
   var titleInput = form.querySelector('#title');
   var priceInput = form.querySelector('#price');
   var addressInput = form.querySelector('#address');
+
+  var avatarPreview = form.querySelector('.notice__preview img');
+  var imagesContainer = form.querySelector('.form__photo-container');
 
   /**
    * Fills in the address input with position of the main pin
@@ -54,6 +60,14 @@
     }
   };
 
+  var removeImages = function () {
+    var images = imagesContainer.querySelectorAll('img');
+    avatarPreview.src = 'img/muffin.png';
+    images.forEach(function (image) {
+      imagesContainer.removeChild(image);
+    });
+  };
+
   /**
    * Sets all values to valid form after form enabling
    */
@@ -73,6 +87,7 @@
     var successPopup = window.popup.success();
     document.querySelector('body').appendChild(successPopup);
     form.reset();
+    removeImages();
     initializeForm();
   };
 
@@ -104,13 +119,14 @@
 
     typeSelect.addEventListener('change', function () {
       window.synchronizeFields(typeSelect, priceInput, FormFieldsParams.APARTMENTS_OPTIONS, FormFieldsParams.PRICE_OPTIONS, syncValueWithMin);
+      handlePriceInvalidity(priceInput);
     });
 
-    titleInput.addEventListener('change', function (evt) {
+    titleInput.addEventListener('blur', function (evt) {
       handleTitleInvalidity(evt.target);
     });
 
-    priceInput.addEventListener('change', function (evt) {
+    priceInput.addEventListener('blur', function (evt) {
       handlePriceInvalidity(evt.target);
     });
 
@@ -124,6 +140,13 @@
       window.backend.save(new FormData(form), successHandler, errorHandler);
       event.preventDefault();
     });
+
+    resetButton.addEventListener('click', function (evt) {
+      evt.preventDefault();
+      form.reset();
+      removeImages();
+      initializeForm();
+    });
   };
 
   /**
@@ -131,7 +154,7 @@
    * @param {Node} title - Input[type='text'] for a title
    */
   var handleTitleInvalidity = function (title) {
-    if (title.validity.tooShort) {
+    if (title.validity.tooShort || title.validity.patternMismatch) {
       var message = 'Заголовок должен содержать не менее 30 символов. Символов сейчас: ' + title.value.length;
       title.setCustomValidity(message);
     } else if (title.validity.tooLong) {
@@ -140,7 +163,7 @@
       title.setCustomValidity('Пожалуйста, добавьте заголовок');
     } else {
       title.setCustomValidity('');
-      title.style.borderColor = '#d9d9d3';
+      title.style.borderColor = BASE_BORDER_COLOR;
     }
   };
 
@@ -160,7 +183,7 @@
       price.setCustomValidity('Пожалуйста, введите цену');
     } else {
       price.setCustomValidity('');
-      price.style.borderColor = '#d9d9d3';
+      price.style.borderColor = BASE_BORDER_COLOR;
     }
   };
 

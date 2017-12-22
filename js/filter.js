@@ -69,7 +69,7 @@
 
   var filtersContainer = document.querySelector('.map__filters-container');
   var filterFields = document.querySelectorAll('.map__filter');
-  var filteredArray = [];
+  var filteredAdverts = [];
 
   filtersContainer.addEventListener('change', function () {
     window.utils.debounce(window.map.updateMap, FILTER_SWITCH_LATENCY);
@@ -88,17 +88,17 @@
       return filter.value !== 'any';
     });
 
-    filteredArray = initialAdverts.slice();
+    filteredAdverts = initialAdverts.slice();
 
     appliedFilters.forEach(function (filter) {
       var type = filter.id.split('-')[1]; // get 'type' from 'housing-type' and so on...
-      filteredArray = (type === 'price') ? filterByPrice(filteredArray, filter.value) : filterByValue(filteredArray, filter.value, type);
+      filteredAdverts = (type === 'price') ? filterByPrice(filteredAdverts, filter.value) : filterByValue(filteredAdverts, filter.value, type);
     });
 
     activeFeatures.forEach(function (feature) {
-      filteredArray = filterByFeature(filteredArray, feature.value);
+      filteredAdverts = filterByFeature(filteredAdverts, feature.value);
     });
 
-    return filteredArray;
+    return filteredAdverts;
   };
 })();
