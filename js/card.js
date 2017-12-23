@@ -1,7 +1,9 @@
 'use strict';
 
 (function () {
-  /** @enum {number} KeyCodes */
+  /**
+   * @enum {number} KeyCodes
+   */
   var KeyCodes = {
     ENTER: 13,
     ESC: 27
@@ -118,7 +120,6 @@
     }
   };
 
-  // window.createCard = createCard;
   window.card = {
     create: createCard,
     hide: hideCard

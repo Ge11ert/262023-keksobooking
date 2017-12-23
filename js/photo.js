@@ -5,6 +5,7 @@
    * @const {Array.<string>}
    */
   var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
+
   /**
    * @const {string}
    */

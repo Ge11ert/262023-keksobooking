@@ -88,7 +88,6 @@
   };
 
   window.utils = {
-    getRandomFromRange: getRandomFromRange,
     getRandomArrayCopy: getRandomArrayCopy,
     clearDOMNode: clearDOMNode,
     getWordEnding: getWordEnding,

@@ -8,6 +8,9 @@
    * @property {Object} location
    */
 
+  /** @const {number} */
+  var MAX_ADVERTS_AMOUNT = 5;
+
   /** @enum {number} KeyCodes */
   var KeyCodes = {
     ENTER: 13,
@@ -26,8 +29,6 @@
     Y_MIN: 100,
     Y_MAX: 500
   };
-
-  var MAX_ADVERTS_AMOUNT = 5;
 
   var pinOffsetY = MainPinParams.HEIGHT / 2 + MainPinParams.ARROW_HEIGHT;
 
@@ -60,12 +61,12 @@
   };
 
   /**
-   * In case of failed downloading from a sever, shows warning message
+   * In case of failed downloading from a sever, shows createWarning message
    * with error details
    * @param {string} errorMessage
    */
   var errorHandler = function (errorMessage) {
-    var warning = window.popup.warning('Не удалось загрузить объявления. ' + errorMessage);
+    var warning = window.popup.createWarning('Не удалось загрузить объявления. ' + errorMessage);
     document.querySelector('body').appendChild(warning);
   };
 
@@ -252,6 +253,6 @@
   window.map = {
     insertExternalNode: insertExternalNode,
     getMainPinPosition: getMainPinPosition,
-    updateMap: updateMap
+    update: updateMap
   };
 })();

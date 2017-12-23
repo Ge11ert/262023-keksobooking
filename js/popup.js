@@ -3,7 +3,7 @@
 (function () {
   /**
    * @const {number}
-   * */
+   */
   var POPUP_FADEOUT_TIME = 4000; // in ms
 
   /**
@@ -91,8 +91,8 @@
   };
 
   window.popup = {
-    warning: createWarningPopup,
-    success: createSuccessPopup
+    createWarning: createWarningPopup,
+    createSuccess: createSuccessPopup
   };
 
 })();
