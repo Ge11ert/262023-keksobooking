@@ -72,7 +72,7 @@
   var filteredAdverts = [];
 
   filtersContainer.addEventListener('change', function () {
-    window.utils.debounce(window.map.updateMap, FILTER_SWITCH_LATENCY);
+    window.utils.debounce(window.map.update, FILTER_SWITCH_LATENCY);
   });
 
   /**

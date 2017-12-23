@@ -1,6 +1,9 @@
 'use strict';
 
 (function () {
+  /**
+   * @const {string}
+   */
   var BASE_URL = 'https://1510.dump.academy/keksobooking';
 
   /**
